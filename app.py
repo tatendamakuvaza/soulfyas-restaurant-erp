@@ -56,9 +56,8 @@ def setup():
     with engine.begin() as c:
         for s in SCHEMA.split(';'):
             if s.strip(): c.execute(text(s))
-        # Upgrade the earlier Neon schema without deleting existing data.
+        # Fresh, self-contained schema. No references to legacy trading_name/legal_name columns.
         c.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS name TEXT"))
-        c.execute(text("UPDATE companies SET name=COALESCE(NULLIF(name,''), trading_name, legal_name, 'Soulfyas Quality Restaurant') WHERE name IS NULL OR name=''"))
         if c.execute(text('SELECT COUNT(*) FROM companies')).scalar()==0:
             cid=c.execute(text("INSERT INTO companies(name) VALUES('Soulfyas Quality Restaurant') RETURNING id")).scalar_one()
             accounts=[('1000','Cash','asset'),('1100','Bank','asset'),('1200','Inventory','asset'),('2000','Trade Payables','liability'),('3000','Equity','equity'),('4000','Restaurant Revenue','revenue'),('5000','Cost of Sales','expense'),('6000','Operating Expenses','expense'),('2100','VAT Payable','liability'),('2200','PAYE Payable','liability'),('2210','NSSA Payable','liability')]
@@ -165,4 +164,3 @@ elif page=='Settings':
     with st.form('settings'):
         n=st.text_input('Restaurant name',company['name']); a=st.text_input('Address',company['address']); p=st.text_input('Phone',company['phone']); tin=st.text_input('ZIMRA TIN',company['zimra_tin']); vat=st.text_input('VAT number',company['vat_number']); nssa=st.text_input('NSSA number',company['nssa_number']); ok=st.form_submit_button('Save settings')
     if ok: run('UPDATE companies SET name=:n,address=:a,phone=:p,zimra_tin=:t,vat_number=:v,nssa_number=:s WHERE id=:c',{'n':n,'a':a,'p':p,'t':tin,'v':vat,'s':nssa}); st.success('Settings saved. Refresh the app to reload company details.')
-
