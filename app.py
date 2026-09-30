@@ -10,6 +10,11 @@ from reportlab.pdfgen import canvas
 st.set_page_config(page_title='Soulfyas Quality Restaurant ERP', page_icon='🍽️', layout='wide')
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL:
+    try:
+        DATABASE_URL = st.secrets['DATABASE_URL']
+    except Exception:
+        DATABASE_URL = None
+if not DATABASE_URL:
     st.error('DATABASE_URL is not configured. Add it in Streamlit Cloud Secrets.'); st.stop()
 if DATABASE_URL.startswith('postgresql://'): DATABASE_URL=DATABASE_URL.replace('postgresql://','postgresql+psycopg://',1)
 engine=create_engine(DATABASE_URL, pool_pre_ping=True, future=True)
