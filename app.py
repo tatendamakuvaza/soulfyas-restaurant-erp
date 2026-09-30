@@ -5,7 +5,7 @@ from reportlab.pdfgen import canvas
 import pandas as pd
 import streamlit as st
 from sqlalchemy import create_engine, text
-from passlib.hash import bcrypt
+import bcrypt
 
 st.set_page_config(page_title="Soulfyas ERP", page_icon="🍽️", layout="wide", initial_sidebar_state="expanded")
 DB_URL=os.getenv("DATABASE_URL", "sqlite:///soulfyas.db")
