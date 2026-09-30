@@ -51,13 +51,28 @@ def setup():
     with engine.begin() as c:
         for s in SCHEMA.split(';'):
             if s.strip(): c.execute(text(s))
+        # Upgrade the earlier Neon schema without deleting existing data.
+        c.execute(text("ALTER TABLE companies ADD COLUMN IF NOT EXISTS name TEXT"))
+        c.execute(text("UPDATE companies SET name=COALESCE(NULLIF(name,''), trading_name, legal_name, 'Soulfyas Quality Restaurant') WHERE name IS NULL OR name=''"))
         if c.execute(text('SELECT COUNT(*) FROM companies')).scalar()==0:
             cid=c.execute(text("INSERT INTO companies(name) VALUES('Soulfyas Quality Restaurant') RETURNING id")).scalar_one()
             accounts=[('1000','Cash','asset'),('1100','Bank','asset'),('1200','Inventory','asset'),('2000','Trade Payables','liability'),('3000','Equity','equity'),('4000','Restaurant Revenue','revenue'),('5000','Cost of Sales','expense'),('6000','Operating Expenses','expense'),('2100','VAT Payable','liability'),('2200','PAYE Payable','liability'),('2210','NSSA Payable','liability')]
             for code,name,typ in accounts: c.execute(text('INSERT INTO accounts(company_id,code,name,account_type) VALUES(:c,:o,:n,:t)'),{'c':cid,'o':code,'n':name,'t':typ})
             c.execute(text("INSERT INTO users(company_id,username,full_name,password_hash,role) VALUES(:c,'admin','System Administrator',:p,'admin')"),{'c':cid,'p':hash_pw('ChangeMe123!')})
+        # Ensure an administrator exists even when the company was created by an earlier schema.
+        cid=c.execute(text('SELECT id FROM companies ORDER BY id LIMIT 1')).scalar_one()
+        if c.execute(text('SELECT COUNT(*) FROM users')).scalar()==0:
+            c.execute(text("INSERT INTO users(company_id,username,full_name,password_hash,role) VALUES(:c,'admin','System Administrator',:p,'admin')"),{'c':cid,'p':hash_pw('ChangeMe123!')})
 setup()
+# Existing Neon installations may have been created from the earlier schema.
+# Keep the application compatible by using the canonical company columns.
 company=read('SELECT * FROM companies LIMIT 1').iloc[0].to_dict()
+company.setdefault('name', company.get('trading_name') or company.get('legal_name') or 'Soulfyas Quality Restaurant')
+company.setdefault('address', '')
+company.setdefault('phone', '')
+company.setdefault('zimra_tin', '')
+company.setdefault('vat_number', '')
+company.setdefault('nssa_number', '')
 
 def login():
     st.title('🍽️ Soulfyas Quality Restaurant'); st.caption('Secure restaurant ERP')
