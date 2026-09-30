@@ -6,6 +6,7 @@ import streamlit as st
 from sqlalchemy import create_engine, text
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 st.set_page_config(page_title='Soulfyas Quality Restaurant ERP', page_icon='🍽️', layout='wide')
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -46,7 +47,13 @@ def read(sql,params=None):
     with engine.begin() as c: return pd.read_sql(text(sql),c,params=params or {})
 def csv_button(df,name): st.download_button(f'Download {name} CSV',df.to_csv(index=False),f'{name.lower().replace(" ","_")}.csv','text/csv')
 def pdf_button(df,name):
-    b=io.BytesIO(); c=canvas.Canvas(b,pagesize=A4); y=800; c.setFont('Helvetica-Bold',14); c.drawString(35,y,name); y-=25; c.setFont('Helvetica',8)
+    b=io.BytesIO(); c=canvas.Canvas(b,pagesize=A4); y=800
+    if os.path.exists(LOGO):
+        c.drawImage(ImageReader(LOGO), 35, y-45, width=70, height=40, preserveAspectRatio=True, mask='auto')
+        c.setFont('Helvetica-Bold',14); c.drawString(115,y-20,name); y-=65
+    else:
+        c.setFont('Helvetica-Bold',14); c.drawString(35,y,name); y-=25
+    c.setFont('Helvetica',8)
     for _,r in df.iterrows():
         c.drawString(35,y,' | '.join(str(x)[:25] for x in r.tolist())); y-=13
         if y<40: c.showPage(); y=800
