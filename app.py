@@ -1,208 +1,147 @@
 import os, io, html, secrets
 from datetime import date, datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
+import bcrypt
 import pandas as pd
 import streamlit as st
 from sqlalchemy import create_engine, text
-import bcrypt
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
-st.set_page_config(page_title="Soulfyas ERP", page_icon="🍽️", layout="wide", initial_sidebar_state="expanded")
-DB_URL=os.getenv("DATABASE_URL", "sqlite:///soulfyas.db")
-engine=create_engine(DB_URL, future=True)
-LOGO="soulfyas_logo.png"
+st.set_page_config(page_title='Soulfyas Quality Restaurant ERP', page_icon='🍽️', layout='wide')
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    st.error('DATABASE_URL is not configured. Add it in Streamlit Cloud Secrets.'); st.stop()
+if DATABASE_URL.startswith('postgresql://'): DATABASE_URL=DATABASE_URL.replace('postgresql://','postgresql+psycopg://',1)
+engine=create_engine(DATABASE_URL, pool_pre_ping=True, future=True)
+LOGO='soulfyas_logo.png'
 
 SCHEMA='''
-CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT UNIQUE NOT NULL, full_name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'employee', active INTEGER DEFAULT 1, created_at TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS menu_items (id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT, price REAL NOT NULL, cost REAL DEFAULT 0, active INTEGER DEFAULT 1);
-CREATE TABLE IF NOT EXISTS customers (id INTEGER PRIMARY KEY, name TEXT NOT NULL, phone TEXT, email TEXT);
-CREATE TABLE IF NOT EXISTS suppliers (id INTEGER PRIMARY KEY, name TEXT NOT NULL, phone TEXT, email TEXT);
-CREATE TABLE IF NOT EXISTS sales (id INTEGER PRIMARY KEY, invoice_no TEXT UNIQUE NOT NULL, sale_date TEXT NOT NULL, customer_id INTEGER, payment_method TEXT, subtotal REAL, tax REAL, total REAL, status TEXT DEFAULT 'Paid', created_by TEXT);
-CREATE TABLE IF NOT EXISTS sale_lines (id INTEGER PRIMARY KEY, sale_id INTEGER NOT NULL, item_id INTEGER NOT NULL, quantity REAL NOT NULL, unit_price REAL NOT NULL, line_total REAL NOT NULL);
-CREATE TABLE IF NOT EXISTS expenses (id INTEGER PRIMARY KEY, expense_date TEXT NOT NULL, category TEXT, description TEXT, amount REAL NOT NULL, supplier TEXT, payment_method TEXT, created_by TEXT);
-CREATE TABLE IF NOT EXISTS inventory (id INTEGER PRIMARY KEY, item_name TEXT NOT NULL, category TEXT, unit TEXT, quantity REAL DEFAULT 0, reorder_level REAL DEFAULT 0, unit_cost REAL DEFAULT 0);
-CREATE TABLE IF NOT EXISTS stock_movements (id INTEGER PRIMARY KEY, movement_date TEXT NOT NULL, item_id INTEGER, movement_type TEXT, quantity REAL, unit_cost REAL, notes TEXT, created_by TEXT);
-CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
-CREATE TABLE IF NOT EXISTS journal_entries (id INTEGER PRIMARY KEY, entry_date TEXT NOT NULL, account TEXT NOT NULL, description TEXT, debit REAL DEFAULT 0, credit REAL DEFAULT 0, reference TEXT, created_by TEXT, updated_at TEXT);
+CREATE TABLE IF NOT EXISTS companies(id BIGSERIAL PRIMARY KEY, name TEXT NOT NULL, address TEXT DEFAULT '', phone TEXT DEFAULT '', zimra_tin TEXT DEFAULT '', vat_number TEXT DEFAULT '', nssa_number TEXT DEFAULT '', currency TEXT DEFAULT 'USD', created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE IF NOT EXISTS users(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), username TEXT UNIQUE NOT NULL, full_name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'employee', active BOOLEAN DEFAULT TRUE, created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE IF NOT EXISTS accounts(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), code TEXT NOT NULL, name TEXT NOT NULL, account_type TEXT NOT NULL, UNIQUE(company_id,code));
+CREATE TABLE IF NOT EXISTS menu_items(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), name TEXT NOT NULL, category TEXT, price NUMERIC(18,2) NOT NULL DEFAULT 0, cost NUMERIC(18,2) DEFAULT 0, active BOOLEAN DEFAULT TRUE);
+CREATE TABLE IF NOT EXISTS customers(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), name TEXT NOT NULL, phone TEXT, email TEXT);
+CREATE TABLE IF NOT EXISTS suppliers(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), name TEXT NOT NULL, phone TEXT, email TEXT);
+CREATE TABLE IF NOT EXISTS inventory(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), item_name TEXT NOT NULL, category TEXT, unit TEXT, quantity NUMERIC(18,4) DEFAULT 0, reorder_level NUMERIC(18,4) DEFAULT 0, unit_cost NUMERIC(18,2) DEFAULT 0);
+CREATE TABLE IF NOT EXISTS sales(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), invoice_no TEXT UNIQUE NOT NULL, sale_date DATE NOT NULL, customer_id BIGINT REFERENCES customers(id), payment_method TEXT, subtotal NUMERIC(18,2), tax NUMERIC(18,2), total NUMERIC(18,2), status TEXT DEFAULT 'Paid', created_by BIGINT REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS sale_lines(id BIGSERIAL PRIMARY KEY, sale_id BIGINT REFERENCES sales(id), item_id BIGINT REFERENCES menu_items(id), quantity NUMERIC(18,4), unit_price NUMERIC(18,2), line_total NUMERIC(18,2));
+CREATE TABLE IF NOT EXISTS expenses(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), expense_date DATE NOT NULL, category TEXT, description TEXT, amount NUMERIC(18,2) NOT NULL, supplier TEXT, payment_method TEXT, created_by BIGINT REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS journals(id BIGSERIAL PRIMARY KEY, company_id BIGINT REFERENCES companies(id), entry_date DATE NOT NULL, reference TEXT NOT NULL, description TEXT, status TEXT DEFAULT 'draft', created_by BIGINT REFERENCES users(id), approved_by BIGINT REFERENCES users(id), created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE IF NOT EXISTS journal_lines(id BIGSERIAL PRIMARY KEY, journal_id BIGINT REFERENCES journals(id), account_id BIGINT REFERENCES accounts(id), debit NUMERIC(18,2) DEFAULT 0, credit NUMERIC(18,2) DEFAULT 0, CHECK((debit=0 AND credit>0) OR (credit=0 AND debit>0)));
+CREATE TABLE IF NOT EXISTS audit_log(id BIGSERIAL PRIMARY KEY, company_id BIGINT, user_id BIGINT, action TEXT, entity TEXT, entity_id BIGINT, detail TEXT, created_at TIMESTAMPTZ DEFAULT now());
 '''
 
-def init_db():
-    with engine.begin() as c:
-        for stmt in SCHEMA.split(';'):
-            if stmt.strip(): c.execute(text(stmt))
-        n=c.execute(text('SELECT COUNT(*) FROM users')).scalar()
-        if n==0:
-            c.execute(text("INSERT INTO users(username,full_name,password_hash,role,created_at) VALUES(:u,:f,:p,'admin',:d)"), {"u":"admin","f":"System Administrator","p":bcrypt.hash("ChangeMe123!"),"d":datetime.now().isoformat()})
-        defaults={"restaurant_name":"Soulfyas Quality Restaurant","address":"","phone":"","tax_rate":"0"}
-        for k,v in defaults.items(): c.execute(text("INSERT OR IGNORE INTO settings(key,value) VALUES(:k,:v)"),{"k":k,"v":v})
-init_db()
+def hash_pw(p): return bcrypt.hashpw(p.encode(),bcrypt.gensalt()).decode()
+def verify_pw(p,h):
+    try: return bcrypt.checkpw(p.encode(),h.encode())
+    except Exception: return False
+def run(sql,params=None):
+    with engine.begin() as c: return c.execute(text(sql),params or {})
+def read(sql,params=None):
+    with engine.begin() as c: return pd.read_sql(text(sql),c,params=params or {})
+def csv_button(df,name): st.download_button(f'Download {name} CSV',df.to_csv(index=False),f'{name.lower().replace(" ","_")}.csv','text/csv')
+def pdf_button(df,name):
+    b=io.BytesIO(); c=canvas.Canvas(b,pagesize=A4); y=800; c.setFont('Helvetica-Bold',14); c.drawString(35,y,name); y-=25; c.setFont('Helvetica',8)
+    for _,r in df.iterrows():
+        c.drawString(35,y,' | '.join(str(x)[:25] for x in r.tolist())); y-=13
+        if y<40: c.showPage(); y=800
+    c.save(); st.download_button(f'Download {name} PDF',b.getvalue(),f'{name.lower().replace(" ","_")}.pdf','application/pdf')
 
-def q(sql, params=None):
+def setup():
     with engine.begin() as c:
-        return pd.read_sql(text(sql), c, params=params or {})
-def execsql(sql, params=None):
-    with engine.begin() as c: return c.execute(text(sql), params or {})
-def setting(k):
-    d=q("SELECT value FROM settings WHERE key=:k",{"k":k}); return d.iloc[0,0] if len(d) else ""
+        for s in SCHEMA.split(';'):
+            if s.strip(): c.execute(text(s))
+        if c.execute(text('SELECT COUNT(*) FROM companies')).scalar()==0:
+            cid=c.execute(text("INSERT INTO companies(name) VALUES('Soulfyas Quality Restaurant') RETURNING id")).scalar_one()
+            accounts=[('1000','Cash','asset'),('1100','Bank','asset'),('1200','Inventory','asset'),('2000','Trade Payables','liability'),('3000','Equity','equity'),('4000','Restaurant Revenue','revenue'),('5000','Cost of Sales','expense'),('6000','Operating Expenses','expense'),('2100','VAT Payable','liability'),('2200','PAYE Payable','liability'),('2210','NSSA Payable','liability')]
+            for code,name,typ in accounts: c.execute(text('INSERT INTO accounts(company_id,code,name,account_type) VALUES(:c,:o,:n,:t)'),{'c':cid,'o':code,'n':name,'t':typ})
+            c.execute(text("INSERT INTO users(company_id,username,full_name,password_hash,role) VALUES(:c,'admin','System Administrator',:p,'admin')"),{'c':cid,'p':hash_pw('ChangeMe123!')})
+setup()
+company=read('SELECT * FROM companies LIMIT 1').iloc[0].to_dict()
 
 def login():
-    st.markdown("<div class='login-card'>", unsafe_allow_html=True)
-    if os.path.exists(LOGO): st.image(LOGO, width=180)
-    st.title("Soulfyas ERP")
-    st.caption("Restaurant operations, finance and controls")
-    with st.form("login"):
-        u=st.text_input("Username")
-        p=st.text_input("Password", type="password")
-        ok=st.form_submit_button("Sign in", use_container_width=True)
+    st.title('🍽️ Soulfyas Quality Restaurant'); st.caption('Secure restaurant ERP')
+    with st.form('login'):
+        u=st.text_input('Username'); p=st.text_input('Password',type='password'); ok=st.form_submit_button('Sign in',use_container_width=True)
     if ok:
-        d=q("SELECT * FROM users WHERE username=:u AND active=1",{"u":u.strip()})
-        if len(d) and bcrypt.verify(p,d.iloc[0].password_hash):
-            st.session_state.user=d.iloc[0].to_dict(); st.rerun()
-        else: st.error("Invalid username or password")
-    st.info("First login: admin / ChangeMe123! — change this immediately in User Administration.")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-def money(x): return f"${float(x or 0):,.2f}"
-def csv_download(df, label):
-    st.download_button(f"Download {label} CSV", df.to_csv(index=False).encode('utf-8'), file_name=f"{label.lower().replace(' ','_')}.csv", mime='text/csv')
-def pdf_download(title, df, label):
-    buf=io.BytesIO(); c=canvas.Canvas(buf,pagesize=A4); w,h=A4; c.setFont('Helvetica-Bold',15); c.drawString(40,h-45,title); c.setFont('Helvetica',8); y=h-70
-    for col in df.columns: c.drawString(40+list(df.columns).index(col)*85,y,str(col)[:13])
-    y-=16
-    for _,row in df.iterrows():
-        for j,val in enumerate(row): c.drawString(40+j*85,y,str(val)[:14])
-        y-=13
-        if y<45: c.showPage(); y=h-45
-    c.save(); st.download_button(f"Download {label} PDF",buf.getvalue(),file_name=f"{label.lower().replace(' ','_')}.pdf",mime='application/pdf')
-def invoice_html(sale, lines):
-    rows=''.join(f"<tr><td>{html.escape(str(x['name']))}</td><td>{x['quantity']}</td><td>{money(x['unit_price'])}</td><td>{money(x['line_total'])}</td></tr>" for _,x in lines.iterrows())
-    return f'''<!doctype html><html><head><meta charset="utf-8"><style>body{{font-family:Arial;color:#222;padding:40px}}h1{{color:#b78b2b}}table{{width:100%;border-collapse:collapse;margin-top:25px}}td,th{{padding:10px;border-bottom:1px solid #ddd;text-align:left}}.total{{text-align:right;font-size:20px;margin-top:20px}}</style></head><body><h1>{html.escape(setting('restaurant_name'))}</h1><p>{html.escape(setting('address'))}<br>{html.escape(setting('phone'))}</p><h2>INVOICE {sale['invoice_no']}</h2><p>Date: {sale['sale_date']}<br>Payment: {sale['payment_method']}</p><table><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>{rows}</table><div class="total">Subtotal: {money(sale['subtotal'])}<br>Tax: {money(sale['tax'])}<br><b>Total: {money(sale['total'])}</b></div><p>Thank you for dining with us.</p></body></html>'''
-
+        d=read('SELECT * FROM users WHERE username=:u AND active=true',{'u':u.strip()})
+        if len(d) and verify_pw(p,str(d.iloc[0].password_hash)): st.session_state.user=d.iloc[0].to_dict(); st.rerun()
+        else: st.error('Invalid username or password')
+    st.info('Initial login: admin / ChangeMe123! — change it immediately.')
 if 'user' not in st.session_state: login(); st.stop()
-user=st.session_state.user
+u=st.session_state.user
+pages=['Dashboard','Point of Sale','Invoices','Menu','Expenses','Inventory','Financial Statements','Tax & Payroll','Journal Adjustments','Customers & Suppliers','User Administration','Settings']
 with st.sidebar:
-    if os.path.exists(LOGO): st.image(LOGO, width=145)
-    st.caption(f"{user['full_name']} · {user['role'].title()}")
-    pages=["Dashboard","Point of Sale","Invoices","Menu","Expenses","Inventory","Financial Statements","Tax & Payroll","Journal Adjustments","Customers & Suppliers","User Administration","Settings"]
-    page=st.radio("Navigate",pages)
-    if st.button("Sign out"): del st.session_state.user; st.rerun()
-
+    if os.path.exists(LOGO): st.image(LOGO,width=150)
+    st.caption(f"{u['full_name']} · {u['role'].title()}"); page=st.radio('Navigate',pages)
+    if st.button('Sign out'): del st.session_state.user; st.rerun()
 st.title(page)
-if page=="Dashboard":
-    today=str(date.today()); sales=q("SELECT COALESCE(SUM(total),0) v FROM sales WHERE sale_date=:d",{"d":today}).iloc[0,0]; exp=q("SELECT COALESCE(SUM(amount),0) v FROM expenses WHERE expense_date=:d",{"d":today}).iloc[0,0]; orders=q("SELECT COUNT(*) v FROM sales WHERE sale_date=:d",{"d":today}).iloc[0,0]
-    a,b,c,d=st.columns(4); a.metric("Today's sales",money(sales)); b.metric("Today's expenses",money(exp)); c.metric("Orders",int(orders)); c.metric("Gross cash",money(sales-exp));
-    st.subheader("Recent invoices"); st.dataframe(q("SELECT invoice_no,sale_date,payment_method,total,status,created_by FROM sales ORDER BY id DESC LIMIT 10"),use_container_width=True,hide_index=True)
-    st.subheader("Low stock alerts"); low=q("SELECT item_name,quantity,reorder_level FROM inventory WHERE quantity<=reorder_level ORDER BY quantity"); st.dataframe(low,use_container_width=True,hide_index=True) if len(low) else st.success("No low-stock items.")
 
-elif page=="Point of Sale":
-    items=q("SELECT * FROM menu_items WHERE active=1 ORDER BY category,name")
-    if not len(items): st.warning("Add menu items first."); st.stop()
-    with st.form("sale"):
-        cols=st.columns(3); chosen=[]
+if page=='Dashboard':
+    d=str(date.today()); rev=read('SELECT COALESCE(SUM(total),0) x FROM sales WHERE sale_date=:d',{'d':d}).iloc[0,0]; ex=read('SELECT COALESCE(SUM(amount),0) x FROM expenses WHERE expense_date=:d',{'d':d}).iloc[0,0]
+    a,b,c=st.columns(3); a.metric('Today sales',f'${float(rev):,.2f}'); b.metric('Today expenses',f'${float(ex):,.2f}'); c.metric('Net',f'${float(rev-ex):,.2f}')
+    st.dataframe(read('SELECT invoice_no,sale_date,payment_method,total,status FROM sales ORDER BY id DESC LIMIT 15'),use_container_width=True,hide_index=True)
+elif page=='Point of Sale':
+    items=read('SELECT * FROM menu_items WHERE company_id=:c AND active=true ORDER BY name',{'c':company['id']})
+    if not len(items): st.warning('Add menu items first.'); st.stop()
+    with st.form('pos'):
+        selected=[]
         for i,r in items.iterrows():
-            with cols[i%3]:
-                qty=st.number_input(f"{r['name']} ({money(r['price'])})",min_value=0.0,step=1.0,key=f"qty{i}")
-                if qty: chosen.append((int(r.id),r['name'],qty,float(r.price),qty*float(r.price)))
-        method=st.selectbox("Payment method",["Cash","Card","Mobile money","Bank transfer","Credit"]); submit=st.form_submit_button("Complete sale",type="primary")
-    if submit:
-        if not chosen: st.error("Select at least one item.")
-        else:
-            sub=sum(x[4] for x in chosen); tax=sub*float(setting('tax_rate') or 0)/100; total=sub+tax; inv=f"SQR-{datetime.now().strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(2).upper()}"
-            with engine.begin() as c:
-                res=c.execute(text("INSERT INTO sales(invoice_no,sale_date,payment_method,subtotal,tax,total,created_by) VALUES(:i,:d,:m,:s,:t,:v,:u)"),{"i":inv,"d":str(date.today()),"m":method,"s":sub,"t":tax,"v":total,"u":user['username']}); sid=res.lastrowid
-                for iid,n,qty,price,line in chosen: c.execute(text("INSERT INTO sale_lines(sale_id,item_id,quantity,unit_price,line_total) VALUES(:s,:i,:q,:p,:l)"),{"s":sid,"i":iid,"q":qty,"p":price,"l":line})
-            st.success(f"Sale {inv} recorded: {money(total)}")
-
-elif page=="Invoices":
-    inv=q("SELECT * FROM sales ORDER BY id DESC"); st.dataframe(inv,use_container_width=True,hide_index=True); csv_download(inv,'Invoices'); pdf_download('Soulfyas Invoices',inv,'Invoices')
-    if len(inv):
-        no=st.selectbox("Download invoice",inv.invoice_no.tolist()); sale=inv[inv.invoice_no==no].iloc[0]; lines=q("SELECT m.name,l.quantity,l.unit_price,l.line_total FROM sale_lines l JOIN menu_items m ON m.id=l.item_id WHERE l.sale_id=:s",{"s":int(sale.id)}); st.download_button("Download invoice HTML",invoice_html(sale,lines),file_name=f"{no}.html",mime="text/html")
-
-elif page=="Menu":
-    with st.form("newmenu"):
-        a,b,c,d=st.columns(4); name=a.text_input("Item name"); cat=b.text_input("Category"); price=c.number_input("Selling price",min_value=0.0); cost=d.number_input("Cost",min_value=0.0); ok=st.form_submit_button("Add item")
-    if ok and name: execsql("INSERT INTO menu_items(name,category,price,cost) VALUES(:n,:c,:p,:o)",{"n":name,"c":cat,"p":price,"o":cost}); st.rerun()
-    st.dataframe(q("SELECT * FROM menu_items ORDER BY category,name"),use_container_width=True,hide_index=True)
-
-elif page=="Expenses":
-    with st.form("expense"):
-        a,b,c=st.columns(3); dt=a.date_input("Date"); cat=b.text_input("Category"); desc=c.text_input("Description"); amt=st.number_input("Amount",min_value=0.0); supplier=st.text_input("Supplier"); method=st.selectbox("Payment method",["Cash","Card","Bank transfer","Mobile money"]); ok=st.form_submit_button("Record expense")
-    if ok and amt: execsql("INSERT INTO expenses(expense_date,category,description,amount,supplier,payment_method,created_by) VALUES(:d,:c,:x,:a,:s,:m,:u)",{"d":str(dt),"c":cat,"x":desc,"a":amt,"s":supplier,"m":method,"u":user['username']}); st.rerun()
-    expdf=q("SELECT * FROM expenses ORDER BY id DESC"); st.dataframe(expdf,use_container_width=True,hide_index=True); csv_download(expdf,'Expenses'); pdf_download('Soulfyas Expenses',expdf,'Expenses')
-
-elif page=="Inventory":
-    with st.form("stock"):
-        a,b,c,d,e=st.columns(5); n=a.text_input("Item"); cat=b.text_input("Category"); unit=c.text_input("Unit",value="each"); qty=d.number_input("Quantity",min_value=0.0); reorder=e.number_input("Reorder level",min_value=0.0); cost=st.number_input("Unit cost",min_value=0.0); ok=st.form_submit_button("Add stock item")
-    if ok and n: execsql("INSERT INTO inventory(item_name,category,unit,quantity,reorder_level,unit_cost) VALUES(:n,:c,:u,:q,:r,:o)",{"n":n,"c":cat,"u":unit,"q":qty,"r":reorder,"o":cost}); st.rerun()
-    invdf=q("SELECT * FROM inventory ORDER BY item_name"); st.dataframe(invdf,use_container_width=True,hide_index=True); csv_download(invdf,'Inventory'); pdf_download('Soulfyas Inventory',invdf,'Inventory')
-
-elif page=="Financial Statements":
-    st.info("IFRS 18-ready presentation is designed for annual periods beginning 1 January 2027. IFRS 18 replaces IAS 1 and introduces operating, investing and financing categories, operating profit, profit before financing and income taxes, MPM disclosures and stronger aggregation/disaggregation.")
-    start=st.date_input("From",date(date.today().year,1,1)); end=st.date_input("To",date.today())
-    revenue=float(q("SELECT COALESCE(SUM(subtotal),0) v FROM sales WHERE sale_date BETWEEN :a AND :b",{"a":str(start),"b":str(end)}).iloc[0,0]); tax=float(q("SELECT COALESCE(SUM(tax),0) v FROM sales WHERE sale_date BETWEEN :a AND :b",{"a":str(start),"b":str(end)}).iloc[0,0]); expenses=float(q("SELECT COALESCE(SUM(amount),0) v FROM expenses WHERE expense_date BETWEEN :a AND :b",{"a":str(start),"b":str(end)}).iloc[0,0]); inventory_value=float(q("SELECT COALESCE(SUM(quantity*unit_cost),0) v FROM inventory").iloc[0,0]); cash=revenue-expenses
-    tabs=st.tabs(["Profit or loss","Financial position","Cash flows","Changes in equity","Notes & disclosures"])
-    pnl=pd.DataFrame({"Statement of profit or loss (IFRS 18)": ["Revenue","Cost of sales / inventory consumption","Gross profit","Other operating income","Operating expenses","Operating profit","Investing income/(expense)","Profit before financing and income taxes","Finance income/(cost)","Profit before income tax","Income tax expense","Profit for the period"],"Amount":[revenue,0,revenue,0,expenses,revenue-expenses,0,revenue-expenses,0,revenue-expenses,0,revenue-expenses]})
-    with tabs[0]: st.dataframe(pnl,use_container_width=True,hide_index=True); csv_download(pnl,'Income Statement'); pdf_download('Soulfyas IFRS 18 Profit or Loss',pnl,'Income Statement')
-    bs=pd.DataFrame({"Statement of financial position": ["Cash and cash equivalents (operational proxy)","Inventory","Total assets","Trade and other payables","Total liabilities","Share capital and retained earnings","Total equity and liabilities"],"Amount":[cash,inventory_value,cash+inventory_value,0,0,cash+inventory_value,cash+inventory_value]})
-    with tabs[1]: st.dataframe(bs,use_container_width=True,hide_index=True); csv_download(bs,'Statement of Financial Position'); pdf_download('Soulfyas Statement of Financial Position',bs,'Statement of Financial Position')
-    cf=pd.DataFrame({"Statement of cash flows": ["Cash flows from operating activities","Cash flows from investing activities","Cash flows from financing activities","Net increase/(decrease) in cash","Opening cash","Closing cash"],"Amount":[revenue-expenses,0,0,cash,0,cash]})
-    with tabs[2]: st.dataframe(cf,use_container_width=True,hide_index=True); csv_download(cf,'Cash Flow Statement'); pdf_download('Soulfyas Cash Flow Statement',cf,'Cash Flow Statement')
-    eq=pd.DataFrame({"Statement of changes in equity": ["Opening equity","Profit for the period","Dividends/distributions","Closing equity"],"Amount":[0,revenue-expenses,0,revenue-expenses]})
-    with tabs[3]: st.dataframe(eq,use_container_width=True,hide_index=True); csv_download(eq,'Changes in Equity'); pdf_download('Soulfyas Changes in Equity',eq,'Changes in Equity')
-    with tabs[4]:
-        st.markdown("**Required design controls:** comparative prior-period columns; material accounting policy information; operating/investing/financing classification; MPM register and reconciliations; expense disaggregation by nature/function; going concern; related parties; events after reporting period; contingencies; commitments; tax; leases; employee benefits; revenue; financial instruments; impairment; inventory; PPE; provisions; and foreign exchange.")
-        st.caption("These are operational statements based on the current starter data model, not a certified IFRS set. A Zimbabwe-registered accountant must configure the chart of accounts, tax rules, liabilities, equity, adjustments and disclosures before statutory use.")
-
-elif page=="Tax & Payroll":
-    st.subheader("Zimbabwe tax and statutory configuration")
-    st.warning("Rates and thresholds change. Store effective-dated rules and verify every filing against ZIMRA/NSSA notices before submission.")
-    with st.form("taxsettings"):
-        a,b,c,d=st.columns(4); tin=a.text_input("ZIMRA TIN"); vat=b.text_input("VAT number"); nssa=b.text_input("NSSA employer number"); currency=c.selectbox("Functional currency",["USD","ZiG","Other"]); vat_rate=d.number_input("VAT rate %",min_value=0.0,value=15.0); ok=st.form_submit_button("Save tax profile")
-    if ok:
-        for k,v in [("zimra_tin",tin),("vat_number",vat),("nssa_number",nssa),("currency",currency),("vat_rate",str(vat_rate))]: execsql("INSERT OR REPLACE INTO settings(key,value) VALUES(:k,:v)",{"k":k,"v":v})
-        st.success("Tax profile saved")
-    st.subheader("NSSA Pension and Other Benefits Scheme")
-    st.write("Default configurable rule: employee 4.5% and employer 4.5% of insurable earnings, subject to the current gazetted ceiling. The current NSSA site shows a USD 700 ceiling; verify the current quarter before payroll.")
-    st.subheader("Tax obligations to support")
-    taxob=pd.DataFrame({"Obligation":["VAT","PAYE","Withholding tax","IMTT","Corporate income tax","NSSA POBS","NSSA APWCS","Fiscalisation"],"Authority":["ZIMRA","ZIMRA","ZIMRA","ZIMRA","ZIMRA","NSSA","NSSA","ZIMRA"],"Status":["Configure","Configure","Configure","Configure","Configure","Enabled","Configure","Configure"]})
-    st.dataframe(taxob,use_container_width=True,hide_index=True); csv_download(taxob,'Tax Obligations'); pdf_download('Soulfyas Tax Obligations',taxob,'Tax Obligations')
-elif page=="Journal Adjustments":
-    if user['role'] not in ('admin','manager'):
-        st.error("Top management access required."); st.stop()
-    st.warning("Use this controlled journal for approved corrections. Posted sales and expenses should not be silently overwritten; use a reversing or correcting entry with a reference.")
-    with st.form("journal"):
-        a,b,c,d,e=st.columns(5); dt=a.date_input("Entry date"); account=b.text_input("Account"); desc=c.text_input("Description"); debit=d.number_input("Debit",min_value=0.0); credit=e.number_input("Credit",min_value=0.0); ref=st.text_input("Approval/reference"); ok=st.form_submit_button("Post adjustment")
-    if ok and account and (debit or credit) and ref:
-        execsql("INSERT INTO journal_entries(entry_date,account,description,debit,credit,reference,created_by,updated_at) VALUES(:d,:a,:x,:dr,:cr,:r,:u,:t)",{"d":str(dt),"a":account,"x":desc,"dr":debit,"cr":credit,"r":ref,"u":user['username'],"t":datetime.now().isoformat()}); st.success("Adjustment posted")
-    je=q("SELECT * FROM journal_entries ORDER BY id DESC"); st.dataframe(je,use_container_width=True,hide_index=True); csv_download(je,'Journal Adjustments'); pdf_download('Soulfyas Journal Adjustments',je,'Journal Adjustments')
-    st.caption("For production, enforce balanced double-entry batches, approval workflow, period locks and immutable audit history.")
-
-elif page=="Customers & Suppliers":
-    tab1,tab2=st.tabs(["Customers","Suppliers"])
-    with tab1:
-        with st.form("cust"): n=st.text_input("Customer name"); p=st.text_input("Phone"); e=st.text_input("Email"); ok=st.form_submit_button("Add customer")
-        if ok and n: execsql("INSERT INTO customers(name,phone,email) VALUES(:n,:p,:e)",{"n":n,"p":p,"e":e}); st.rerun()
-        st.dataframe(q("SELECT * FROM customers"),use_container_width=True,hide_index=True)
-    with tab2:
-        with st.form("supp"): n=st.text_input("Supplier name"); p=st.text_input("Phone"); e=st.text_input("Email"); ok=st.form_submit_button("Add supplier")
-        if ok and n: execsql("INSERT INTO suppliers(name,phone,email) VALUES(:n,:p,:e)",{"n":n,"p":p,"e":e}); st.rerun()
-        st.dataframe(q("SELECT * FROM suppliers"),use_container_width=True,hide_index=True)
-
-elif page=="User Administration":
-    if user['role']!='admin': st.error("Administrator access required."); st.stop()
-    with st.form("useradd"):
-        a,b,c,d=st.columns(4); un=a.text_input("Username"); fn=b.text_input("Full name"); pw=c.text_input("Temporary password",type="password"); role=d.selectbox("Role",["employee","manager","admin"]); ok=st.form_submit_button("Create account")
+            q=st.number_input(f"{r['name']} (${float(r['price']):,.2f})",0.0,step=1.0,key=f'item{i}')
+            if q: selected.append((int(r.id),q,float(r.price),q*float(r.price)))
+        method=st.selectbox('Payment method',['Cash','Card','Mobile money','Bank transfer','Credit']); ok=st.form_submit_button('Complete sale',type='primary')
+    if ok and selected:
+        sub=sum(x[3] for x in selected); tax=sub*0.0; total=sub+tax; inv=f"SQR-{datetime.now():%Y%m%d%H%M%S}-{secrets.token_hex(2).upper()}"
+        with engine.begin() as c:
+            sid=c.execute(text('INSERT INTO sales(company_id,invoice_no,sale_date,payment_method,subtotal,tax,total,created_by) VALUES(:c,:i,:d,:m,:s,:t,:v,:u) RETURNING id'),{'c':company['id'],'i':inv,'d':str(date.today()),'m':method,'s':sub,'t':tax,'v':total,'u':u['id']}).scalar_one()
+            for iid,q,p,l in selected: c.execute(text('INSERT INTO sale_lines(sale_id,item_id,quantity,unit_price,line_total) VALUES(:s,:i,:q,:p,:l)'),{'s':sid,'i':iid,'q':q,'p':p,'l':l})
+        st.success(f'{inv} recorded: ${total:,.2f}')
+elif page=='Menu':
+    with st.form('menu'):
+        n=st.text_input('Item name'); cat=st.text_input('Category'); price=st.number_input('Selling price',0.0); cost=st.number_input('Cost',0.0); ok=st.form_submit_button('Add item')
+    if ok and n: run('INSERT INTO menu_items(company_id,name,category,price,cost) VALUES(:c,:n,:g,:p,:o)',{'c':company['id'],'n':n,'g':cat,'p':price,'o':cost}); st.rerun()
+    st.dataframe(read('SELECT id,name,category,price,cost,active FROM menu_items WHERE company_id=:c ORDER BY name',{'c':company['id']}),use_container_width=True,hide_index=True)
+elif page=='Expenses':
+    with st.form('expense'):
+        dt=st.date_input('Date'); cat=st.text_input('Category'); desc=st.text_input('Description'); amount=st.number_input('Amount',0.0); supplier=st.text_input('Supplier'); method=st.selectbox('Payment method',['Cash','Card','Bank transfer','Mobile money']); ok=st.form_submit_button('Record expense')
+    if ok and amount: run('INSERT INTO expenses(company_id,expense_date,category,description,amount,supplier,payment_method,created_by) VALUES(:c,:d,:g,:x,:a,:s,:m,:u)',{'c':company['id'],'d':str(dt),'g':cat,'x':desc,'a':amount,'s':supplier,'m':method,'u':u['id']}); st.rerun()
+    df=read('SELECT * FROM expenses WHERE company_id=:c ORDER BY id DESC',{'c':company['id']}); st.dataframe(df,use_container_width=True,hide_index=True); csv_button(df,'Expenses'); pdf_button(df,'Expenses')
+elif page=='Inventory':
+    with st.form('inventory'):
+        n=st.text_input('Item'); cat=st.text_input('Category'); unit=st.text_input('Unit',value='each'); qty=st.number_input('Quantity',0.0); reorder=st.number_input('Reorder level',0.0); cost=st.number_input('Unit cost',0.0); ok=st.form_submit_button('Add stock')
+    if ok and n: run('INSERT INTO inventory(company_id,item_name,category,unit,quantity,reorder_level,unit_cost) VALUES(:c,:n,:g,:u,:q,:r,:o)',{'c':company['id'],'n':n,'g':cat,'u':unit,'q':qty,'r':reorder,'o':cost}); st.rerun()
+    df=read('SELECT * FROM inventory WHERE company_id=:c ORDER BY item_name',{'c':company['id']}); st.dataframe(df,use_container_width=True,hide_index=True); csv_button(df,'Inventory'); pdf_button(df,'Inventory')
+elif page=='Invoices':
+    df=read('SELECT invoice_no,sale_date,payment_method,subtotal,tax,total,status FROM sales WHERE company_id=:c ORDER BY id DESC',{'c':company['id']}); st.dataframe(df,use_container_width=True,hide_index=True); csv_button(df,'Invoices'); pdf_button(df,'Invoices')
+elif page=='Financial Statements':
+    start=st.date_input('From',date(date.today().year,1,1)); end=st.date_input('To',date.today()); revenue=float(read('SELECT COALESCE(SUM(subtotal),0) x FROM sales WHERE sale_date BETWEEN :a AND :b',{'a':str(start),'b':str(end)}).iloc[0,0]); expenses=float(read('SELECT COALESCE(SUM(amount),0) x FROM expenses WHERE expense_date BETWEEN :a AND :b',{'a':str(start),'b':str(end)}).iloc[0,0]); profit=revenue-expenses
+    df=pd.DataFrame({'IFRS 18 statement of profit or loss':['Revenue','Operating expenses','Operating profit','Profit before financing and income taxes','Income tax expense','Profit for the period'],'Amount':[revenue,expenses,profit,profit,0,profit]}); st.dataframe(df,use_container_width=True,hide_index=True); csv_button(df,'Income Statement'); pdf_button(df,'Income Statement'); st.info('IFRS 18 is effective for annual periods beginning 1 January 2027. Final statutory reporting requires a complete trial balance and accountant-reviewed configuration.')
+elif page=='Tax & Payroll':
+    st.subheader('Zimbabwe tax configuration'); st.write('Configure ZIMRA TIN, VAT, PAYE, withholding tax, IMTT, fiscalisation and NSSA POBS/APWCS. Rates and ceilings must be updated from current official notices.'); st.table(pd.DataFrame({'Obligation':['VAT','PAYE','Withholding tax','IMTT','NSSA POBS','NSSA APWCS','Fiscalisation'],'Authority':['ZIMRA','ZIMRA','ZIMRA','ZIMRA','NSSA','NSSA','ZIMRA']}))
+elif page=='Journal Adjustments':
+    if u['role'] not in ('admin','manager'): st.error('Top-management access required.'); st.stop()
+    with st.form('journal'):
+        dt=st.date_input('Date'); ref=st.text_input('Reference'); desc=st.text_input('Description'); account=st.text_input('Account'); debit=st.number_input('Debit',0.0); credit=st.number_input('Credit',0.0); ok=st.form_submit_button('Record adjustment')
+    if ok and ref and account and ((debit>0) ^ (credit>0)): run('INSERT INTO journals(company_id,entry_date,reference,description,status,created_by) VALUES(:c,:d,:r,:x,\'posted\',:u)',{'c':company['id'],'d':str(dt),'r':ref,'x':desc,'u':u['id']}); st.success('Adjustment recorded; approval and balanced batch review required.')
+elif page=='Customers & Suppliers':
+    a,b=st.tabs(['Customers','Suppliers'])
+    with a:
+        with st.form('customer'): n=st.text_input('Customer name'); p=st.text_input('Phone'); e=st.text_input('Email'); ok=st.form_submit_button('Add customer')
+        if ok and n: run('INSERT INTO customers(company_id,name,phone,email) VALUES(:c,:n,:p,:e)',{'c':company['id'],'n':n,'p':p,'e':e}); st.rerun()
+        st.dataframe(read('SELECT * FROM customers WHERE company_id=:c',{'c':company['id']}),use_container_width=True,hide_index=True)
+    with b:
+        with st.form('supplier'): n=st.text_input('Supplier name'); p=st.text_input('Phone'); e=st.text_input('Email'); ok=st.form_submit_button('Add supplier')
+        if ok and n: run('INSERT INTO suppliers(company_id,name,phone,email) VALUES(:c,:n,:p,:e)',{'c':company['id'],'n':n,'p':p,'e':e}); st.rerun()
+        st.dataframe(read('SELECT * FROM suppliers WHERE company_id=:c',{'c':company['id']}),use_container_width=True,hide_index=True)
+elif page=='User Administration':
+    if u['role']!='admin': st.error('Administrator access required.'); st.stop()
+    with st.form('newuser'):
+        un=st.text_input('Username'); fn=st.text_input('Full name'); pw=st.text_input('Temporary password',type='password'); role=st.selectbox('Role',['employee','manager','admin']); ok=st.form_submit_button('Create account')
     if ok and un and fn and pw:
-        try: execsql("INSERT INTO users(username,full_name,password_hash,role,created_at) VALUES(:u,:f,:p,:r,:d)",{"u":un,"f":fn,"p":bcrypt.hash(pw),"r":role,"d":datetime.now().isoformat()}); st.success("Account created")
-        except Exception as e: st.error(str(e))
-    st.dataframe(q("SELECT id,username,full_name,role,active,created_at FROM users"),use_container_width=True,hide_index=True)
-
-elif page=="Settings":
-    if user['role']!='admin': st.error("Administrator access required."); st.stop()
-    with st.form("settings"):
-        n=st.text_input("Restaurant name",setting('restaurant_name')); a=st.text_input("Address",setting('address')); p=st.text_input("Phone",setting('phone')); tax=st.number_input("Tax rate %",value=float(setting('tax_rate') or 0)); ok=st.form_submit_button("Save settings")
-    if ok:
-        for k,v in [("restaurant_name",n),("address",a),("phone",p),("tax_rate",str(tax))]: execsql("INSERT OR REPLACE INTO settings(key,value) VALUES(:k,:v)",{"k":k,"v":v})
-        st.success("Settings saved")
-
-st.markdown("<style>.stApp{background:#fbfaf7}.login-card{max-width:520px;margin:5vh auto;padding:2rem;background:white;border-radius:18px;box-shadow:0 8px 32px #0001}.stButton>button{border-radius:8px}.stMetric{background:white;padding:10px;border-radius:10px}</style>",unsafe_allow_html=True)
+        run('INSERT INTO users(company_id,username,full_name,password_hash,role) VALUES(:c,:u,:f,:p,:r)',{'c':company['id'],'u':un,'f':fn,'p':hash_pw(pw),'r':role}); st.success('Account created')
+    st.dataframe(read('SELECT id,username,full_name,role,active,created_at FROM users WHERE company_id=:c',{'c':company['id']}),use_container_width=True,hide_index=True)
+elif page=='Settings':
+    if u['role']!='admin': st.error('Administrator access required.'); st.stop()
+    with st.form('settings'):
+        n=st.text_input('Restaurant name',company['name']); a=st.text_input('Address',company['address']); p=st.text_input('Phone',company['phone']); tin=st.text_input('ZIMRA TIN',company['zimra_tin']); vat=st.text_input('VAT number',company['vat_number']); nssa=st.text_input('NSSA number',company['nssa_number']); ok=st.form_submit_button('Save settings')
+    if ok: run('UPDATE companies SET name=:n,address=:a,phone=:p,zimra_tin=:t,vat_number=:v,nssa_number=:s WHERE id=:c',{'n':n,'a':a,'p':p,'t':tin,'v':vat,'s':nssa}); st.success('Settings saved. Refresh the app to reload company details.')
