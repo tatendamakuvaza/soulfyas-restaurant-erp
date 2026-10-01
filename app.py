@@ -364,7 +364,6 @@ elif current_page == "Point of Sale (POS)":
                     
                     # Optional Customization / Modifiers Expander
                     with st.expander("⚙️ Customize & Add to Order"):
-                        # Modifiers
                         basting_mods = modifiers_all[modifiers_all['group_name'] == 'Basting & Heat']['name'].tolist()
                         side_mods = modifiers_all[modifiers_all['group_name'] == 'Side Choice']['name'].tolist()
                         extra_mods = modifiers_all[modifiers_all['group_name'] == 'Add-on Topping']
@@ -409,7 +408,6 @@ elif current_page == "Point of Sale (POS)":
         with st.container(border=True):
             st.subheader("🛍️ Current Order Ticket")
             
-            # Order type and table
             oc1, oc2 = st.columns(2)
             with oc1:
                 order_type = st.selectbox("Order Type", ["Dine-In", "Takeaway", "Delivery"], key="pos_type_sel")
@@ -637,7 +635,6 @@ elif current_page == "Floor & Table Manager":
                         db.run("UPDATE tables SET status = :s WHERE id = :tid", {'s': new_status, 'tid': int(tbl['id'])})
                         st.rerun()
                         
-                    # Generate Table QR Code Placard PDF
                     order_url = f"https://soulfyas.co.zw/order?table={tbl['table_number']}"
                     qr_placard = pdf_gen.generate_table_qr_placard_pdf(company, tbl['table_number'], order_url)
                     st.download_button(
@@ -972,7 +969,6 @@ elif current_page == "Cashier Shifts & Z-Reports":
             active_shift = open_shifts.iloc[0].to_dict()
             st.subheader(f"Active Shift #{active_shift['id']} - {active_shift['cashier_name']}")
             
-            # Recalculate today sales by method
             today_s = db.read("""
                 SELECT payment_method, COALESCE(SUM(total), 0) AS tot
                 FROM sales
@@ -1057,8 +1053,8 @@ elif current_page == "Purchase Orders (Auto-Reorder)":
         if len(po_df):
             st.dataframe(po_df.drop(columns=['id']), use_container_width=True, hide_index=True)
             
-            st.subheader("📄 Download Supplier Purchase Order (PDF)")
-            sel_po_id = st.selectbox("Select PO", po_df['id'].tolist(), format_func=lambda x: f"{po_df[po_df['id']==x].iloc[0]['po_number']} - {po_df[po_df['id']==x].iloc[0]['supplier_name']}")
+            st.subheader("📦 Purchase Order Actions & Receiving")
+            sel_po_id = st.selectbox("Select PO", po_df['id'].tolist(), format_func=lambda x: f"{po_df[po_df['id']==x].iloc[0]['po_number']} - {po_df[po_df['id']==x].iloc[0]['supplier_name']} ({po_df[po_df['id']==x].iloc[0]['status']})")
             
             if sel_po_id:
                 po_row = po_df[po_df['id'] == sel_po_id].iloc[0].to_dict()
@@ -1075,13 +1071,25 @@ elif current_page == "Purchase Orders (Auto-Reorder)":
                 """, {'poid': sel_po_id}).to_dict('records')
                 
                 po_pdf = pdf_gen.generate_purchase_order_pdf(company, po_row, po_lines)
-                st.download_button(
-                    label=f"📄 Download {po_row['po_number']} PDF",
-                    data=po_pdf,
-                    file_name=f"PO_{po_row['po_number']}.pdf",
-                    mime="application/pdf",
-                    type="primary"
-                )
+                
+                pocol1, pocol2 = st.columns(2)
+                with pocol1:
+                    st.download_button(
+                        label=f"📄 Download {po_row['po_number']} PDF",
+                        data=po_pdf,
+                        file_name=f"PO_{po_row['po_number']}.pdf",
+                        mime="application/pdf",
+                        type="primary",
+                        use_container_width=True
+                    )
+                with pocol2:
+                    if po_row['status'] != 'Received':
+                        if st.button(f"📥 Receive Goods & Update Inventory ({po_row['po_number']})", use_container_width=True):
+                            db.receive_purchase_order(company['id'], sel_po_id, u['id'])
+                            st.success(f"Goods received! Stock balances updated for {po_row['po_number']}.")
+                            st.rerun()
+                    else:
+                        st.info("✅ Goods have already been received and credited to stock.")
         else:
             st.info("No purchase orders created yet.")
             
@@ -1102,7 +1110,6 @@ elif current_page == "Purchase Orders (Auto-Reorder)":
             st.dataframe(low_items.drop(columns=['id', 'supplier_id']), use_container_width=True, hide_index=True)
             
             if st.button("🚀 Auto-Generate Purchase Orders for All Low Stock Items", type="primary"):
-                # Group by supplier
                 for sup_id, group in low_items.groupby('supplier_id'):
                     if pd.isna(sup_id) or sup_id == 0:
                         sup_id = 1
@@ -1135,7 +1142,7 @@ elif current_page == "Purchase Orders (Auto-Reorder)":
             sup_dict = {int(r['id']): r['name'] for _, r in sup_all.iterrows()}
             sel_sup = st.selectbox("Supplier", options=list(sup_dict.keys()), format_func=lambda x: sup_dict[x])
             
-            inv_all = db.read("SELECT id, item_name, unit, unit_cost FROM inventory WHERE company_id = :c", {'c': company['id']})
+            inv_all = db.read("SELECT id, item_name, unit, unit_cost FROM inventory WHERE company_id = :c ORDER BY item_name", {'c': company['id']})
             sel_inv = st.selectbox("Inventory Item", inv_all['item_name'].tolist())
             
             c1, c2 = st.columns(2)
@@ -1211,9 +1218,7 @@ elif current_page == "Staff Attendance & Tip Pool (Tronc)":
     with t2:
         st.subheader("Distribute Collected Service Gratuities (Tronc Pool)")
         
-        # Calculate total tips collected from sales
         total_tips_collected = float(db.read("SELECT COALESCE(SUM(tip), 0) AS t FROM sales WHERE company_id = :c", {'c': company['id']}).iloc[0]['t'])
-        
         st.metric("Total Tips Collected in Register", f"${total_tips_collected:,.2f}", f"ZiG {total_tips_collected*zig_rate:,.2f}")
         
         staff_pool = db.read("""

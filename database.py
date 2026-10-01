@@ -2,7 +2,7 @@
 Database Manager and Schema Engine for Soulfyas Quality Restaurant ERP
 Supports both PostgreSQL (Neon Cloud) and SQLite (Local / Dev) with unified API,
 automatic migration, inventory stock deduction on sale, audit logging, multi-currency exchange rates,
-dish modifiers, purchase orders, cashier shifts, and staff attendance.
+dish modifiers, purchase orders, cashier shifts, staff attendance, and payroll archiving.
 """
 
 import os
@@ -456,7 +456,7 @@ def init_db():
             credit NUMERIC(18,2) DEFAULT 0.0
         );
         """,
-        # Payroll
+        # Payroll Runs & Lines
         f"""
         CREATE TABLE IF NOT EXISTS payroll_runs (
             id {pk_type},
@@ -530,7 +530,6 @@ def seed_default_data():
     with engine.begin() as conn:
         comp_count = conn.execute(text("SELECT COUNT(*) FROM companies")).scalar_one()
         if comp_count > 0:
-            # Seed modifiers and exchange rates if not present
             try:
                 mod_count = conn.execute(text("SELECT COUNT(*) FROM dish_modifiers")).scalar_one()
                 if mod_count == 0:
@@ -770,7 +769,7 @@ def seed_default_data():
                     VALUES(:r, :inv, :q, :u)
                 """), {'r': rec_id, 'inv': inv_id, 'q': qty_used, 'u': u})
                 
-        # 14. Seed Modifiers & Rates
+        # 14. Modifiers & Rates
         seed_modifiers(conn, cid)
         seed_rates(conn, cid)
         
@@ -780,7 +779,15 @@ def seed_default_data():
             VALUES(:c, 1, 3, :start_time, 100.0, 45.0, 27.0, 0.0, 0.0, 'open')
         """), {'c': cid, 'start_time': datetime.now()})
         
-        # 16. Audit Log Initial Entry
+        # 16. Sample Initial Staff Attendance
+        today_d = str(date.today())
+        for emp_i in range(1, 7):
+            conn.execute(text("""
+                INSERT INTO staff_attendance(company_id, employee_id, work_date, hours_worked, status)
+                VALUES(:c, :eid, :d, 8.0, 'Present')
+            """), {'c': cid, 'eid': emp_i, 'd': today_d})
+            
+        # 17. Audit Log Initial Entry
         conn.execute(text("""
             INSERT INTO audit_log(company_id, user_id, action, entity, entity_id, detail)
             VALUES(:c, 1, 'SYSTEM_INIT', 'System', 1, 'Initialized Soulfyas Quality Restaurant ERP normalized database with multi-currency & modifiers.')
@@ -789,17 +796,14 @@ def seed_default_data():
 def seed_modifiers(conn, cid):
     """Seeds dish modifiers for customizations, basting, and add-on sides"""
     modifiers = [
-        # Side Choices
         ('Traditional Sadza Portion', 'Side Choice', 0.00, 0.35, 4, 0.3),
         ('Crispy Potato Chips', 'Side Choice', 1.00, 0.60, 8, 0.3),
         ('Savory Yellow Rice', 'Side Choice', 0.00, 0.40, None, 0.0),
         ('Fresh Garden Salad', 'Side Choice', 0.50, 0.45, 6, 0.15),
-        # Basting / Heat Levels
         ('Mild Lemon & Herb Basting', 'Basting & Heat', 0.00, 0.10, None, 0.0),
         ('Medium Peri-Peri Sauce', 'Basting & Heat', 0.00, 0.15, 9, 0.03),
         ('Extra Hot Flame Peri-Peri', 'Basting & Heat', 0.00, 0.20, 9, 0.05),
         ('Smokey BBQ Glaze', 'Basting & Heat', 0.00, 0.15, None, 0.0),
-        # Add-on Toppings
         ('Melted Cheddar Cheese Slice', 'Add-on Topping', 1.50, 0.40, 13, 0.05),
         ('Fried Free-Range Egg', 'Add-on Topping', 1.00, 0.30, None, 0.0),
         ('Creamy Garlic Mushroom Sauce', 'Add-on Topping', 2.50, 0.70, None, 0.0),
@@ -836,6 +840,34 @@ def get_current_rate(company_id: int, target_currency: str = 'ZiG') -> float:
     if len(res):
         return float(res.iloc[0]['rate'])
     return 28.50 if target_currency == 'ZiG' else 1.0
+
+def receive_purchase_order(company_id: int, po_id: int, user_id: int):
+    """Marks a purchase order as Received and updates stock balances and movements"""
+    po_info = read("SELECT po_number FROM purchase_orders WHERE id = :id AND company_id = :c", {'id': po_id, 'c': company_id})
+    if not len(po_info):
+        return False
+    po_no = po_info.iloc[0]['po_number']
+    
+    po_lines = read("SELECT inventory_item_id, quantity, unit_cost FROM purchase_order_lines WHERE po_id = :poid", {'poid': po_id})
+    for _, line in po_lines.iterrows():
+        inv_id = int(line['inventory_item_id'])
+        qty = float(line['quantity'])
+        cost = float(line['unit_cost'])
+        
+        run("""
+            UPDATE inventory
+            SET quantity = quantity + :q, unit_cost = :co
+            WHERE id = :iid AND company_id = :c
+        """, {'q': qty, 'co': cost, 'iid': inv_id, 'c': company_id})
+        
+        run("""
+            INSERT INTO stock_movements(company_id, inventory_item_id, movement_type, quantity, unit_cost, reference, reason, created_by)
+            VALUES(:c, :iid, 'Purchase Received', :q, :co, :ref, 'PO goods receipt', :u)
+        """, {'c': company_id, 'iid': inv_id, 'q': qty, 'co': cost, 'ref': po_no, 'u': user_id})
+        
+    run("UPDATE purchase_orders SET status = 'Received' WHERE id = :id", {'id': po_id})
+    log_audit(company_id, user_id, 'PO_RECEIVE', 'PurchaseOrders', po_id, f"Received goods for PO {po_no}")
+    return True
 
 def deduct_inventory_for_sale(company_id: int, sale_id: int, user_id: int = 1):
     """
