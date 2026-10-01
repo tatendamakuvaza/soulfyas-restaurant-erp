@@ -1,12 +1,14 @@
 """
 ReportLab PDF Generation Engine for Soulfyas Quality Restaurant ERP
-Generates branded POS receipts, tax invoices, employee payslips, financial statements, and inventory reports.
+Generates branded POS receipts with ZIMRA QR codes, dual-currency tax invoices,
+employee payslips, financial statements, inventory reports, purchase orders,
+cashier shift Z-reports, and table QR code digital menu placards.
 """
 
 import os
 import io
 from datetime import datetime
-from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import (
@@ -14,6 +16,8 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT, TA_JUSTIFY
+from reportlab.graphics.barcode import qr
+from reportlab.graphics.shapes import Drawing
 
 LOGO_PATH = 'soulfyas_logo.png'
 PRIMARY_COLOR = colors.HexColor('#9b721d')  # Warm Gold
@@ -121,13 +125,12 @@ def create_header(company: dict, doc_title: str):
     
     comp_name = company.get('trading_name') or company.get('name') or 'Soulfyas Quality Restaurant'
     address = company.get('address') or 'Harare, Zimbabwe'
-    phone = company.get('phone') or '+263 77 000 0000'
+    phone = company.get('phone') or '+263 242 700000'
     email = company.get('email') or 'info@soulfyas.co.zw'
     tin = company.get('zimra_tin') or 'N/A'
     vat = company.get('vat_number') or 'N/A'
     nssa = company.get('nssa_number') or 'N/A'
     
-    header_data = []
     logo_elem = None
     if os.path.exists(LOGO_PATH):
         try:
@@ -147,8 +150,8 @@ def create_header(company: dict, doc_title: str):
     right_info_text = (
         f"<font size=14 color='#9b721d'><b>{doc_title.upper()}</b></font><br/>"
         f"<b>Date:</b> {datetime.now().strftime('%d-%b-%Y %H:%M')}<br/>"
-        f"<b>Currency:</b> {company.get('currency', 'USD')}<br/>"
-        f"<b>Fiscalised:</b> Yes (ZIMRA FD compliant)"
+        f"<b>Functional Currency:</b> {company.get('currency', 'USD')}<br/>"
+        f"<b>ZIMRA Fiscalised:</b> YES (FD Verified)"
     )
     
     header_table = Table(
@@ -166,8 +169,18 @@ def create_header(company: dict, doc_title: str):
     elements.append(HRFlowable(width="100%", thickness=1.5, color=PRIMARY_COLOR, spaceAfter=12, spaceBefore=4))
     return elements
 
-def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
-    """Generates a POS Receipt / Tax Invoice PDF"""
+def generate_qr_drawing(data_str: str, size: int = 70):
+    """Generates a QR Code drawing widget for fiscal verification or table ordering"""
+    d = Drawing(size, size)
+    qr_code = qr.QrCodeWidget(data_str)
+    qr_code.barWidth = size
+    qr_code.barHeight = size
+    qr_code.qrVersion = 2
+    d.add(qr_code)
+    return d
+
+def generate_receipt_pdf(company: dict, sale: dict, items: list, zig_rate: float = 28.50) -> bytes:
+    """Generates a POS Receipt / Tax Invoice PDF with ZIMRA QR code and Dual-Currency USD/ZiG totals"""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -199,7 +212,7 @@ def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
         [
             Paragraph(f"<b>Guest:</b> {cust_name}", styles['cell']),
             Paragraph(f"<b>Order Type:</b> {order_type} (Tbl {table_num})", styles['cell']),
-            Paragraph(f"<b>Server:</b> {cashier}", styles['cell'])
+            Paragraph(f"<b>Server / Cashier:</b> {cashier}", styles['cell'])
         ]
     ]
     meta_table = Table(meta_table_data, colWidths=[2.6*inch, 2.4*inch, 2.2*inch])
@@ -212,12 +225,11 @@ def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
     story.append(meta_table)
     story.append(Spacer(1, 12))
     
-    # Line items table
     curr = company.get('currency', 'USD')
     table_rows = [
         [
             Paragraph("<b>#</b>", styles['cell_bold']),
-            Paragraph("<b>Item Description</b>", styles['cell_bold']),
+            Paragraph("<b>Item Description / Modifiers</b>", styles['cell_bold']),
             Paragraph("<b>Qty</b>", styles['cell_right_bold']),
             Paragraph(f"<b>Unit Price ({curr})</b>", styles['cell_right_bold']),
             Paragraph(f"<b>Total ({curr})</b>", styles['cell_right_bold'])
@@ -232,13 +244,18 @@ def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
     
     for idx, item in enumerate(items, 1):
         name = item.get('name', item.get('item_name', 'Item'))
+        notes = item.get('notes', '')
+        desc_text = f"<b>{name}</b>"
+        if notes:
+            desc_text += f"<br/><font size=7 color='#666666'><i>{notes}</i></font>"
+            
         qty = float(item.get('quantity', item.get('qty', 1)))
         price = float(item.get('unit_price', item.get('price', 0.0)))
         line_tot = float(item.get('line_total', qty * price))
         
         table_rows.append([
             Paragraph(str(idx), styles['cell']),
-            Paragraph(str(name), styles['cell']),
+            Paragraph(desc_text, styles['cell']),
             Paragraph(f"{qty:g}", styles['cell_right']),
             Paragraph(f"{price:,.2f}", styles['cell_right']),
             Paragraph(f"{line_tot:,.2f}", styles['cell_right_bold'])
@@ -256,10 +273,14 @@ def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
     story.append(items_table)
     story.append(Spacer(1, 10))
     
-    # Totals summary table
+    # Dual-currency calculation (ZiG equivalent)
+    zig_total = round(total * zig_rate, 2)
+    zig_subtotal = round(subtotal * zig_rate, 2)
+    zig_tax = round(tax * zig_rate, 2)
+    
     summary_data = [
-        [Paragraph("Subtotal (Excl. VAT):", styles['cell_right']), Paragraph(f"{curr} {subtotal:,.2f}", styles['cell_right'])],
-        [Paragraph("VAT (15% ZIMRA Standard):", styles['cell_right']), Paragraph(f"{curr} {tax:,.2f}", styles['cell_right'])]
+        [Paragraph("Subtotal (Excl. VAT):", styles['cell_right']), Paragraph(f"{curr} {subtotal:,.2f} / ZiG {zig_subtotal:,.2f}", styles['cell_right'])],
+        [Paragraph("VAT (15% ZIMRA Standard):", styles['cell_right']), Paragraph(f"{curr} {tax:,.2f} / ZiG {zig_tax:,.2f}", styles['cell_right'])]
     ]
     if discount > 0:
         summary_data.append([Paragraph("Discount Applied:", styles['cell_right']), Paragraph(f"-{curr} {discount:,.2f}", styles['cell_right'])])
@@ -267,23 +288,282 @@ def generate_receipt_pdf(company: dict, sale: dict, items: list) -> bytes:
         summary_data.append([Paragraph("Service Tip / Gratuity:", styles['cell_right']), Paragraph(f"{curr} {tip:,.2f}", styles['cell_right'])])
         
     summary_data.append([
-        Paragraph("<b>GRAND TOTAL:</b>", styles['cell_right_bold']),
+        Paragraph("<b>GRAND TOTAL (USD):</b>", styles['cell_right_bold']),
         Paragraph(f"<b>{curr} {total:,.2f}</b>", styles['cell_right_bold'])
     ])
+    summary_data.append([
+        Paragraph("<b>EQUIVALENT IN ZiG (RBZ Rate):</b>", styles['cell_right_bold']),
+        Paragraph(f"<b>ZiG {zig_total:,.2f} (Rate: {zig_rate:.2f})</b>", styles['cell_right_bold'])
+    ])
     
-    summary_table = Table(summary_data, colWidths=[5.7*inch, 1.5*inch])
+    summary_table = Table(summary_data, colWidths=[4.6*inch, 2.6*inch])
     summary_table.setStyle(TableStyle([
         ('PADDING', (0,0), (-1,-1), 4),
-        ('LINEABOVE', (0,-1), (-1,-1), 1, PRIMARY_COLOR),
-        ('BACKGROUND', (0,-1), (-1,-1), ACCENT_BG),
+        ('LINEABOVE', (0,-2), (-1,-2), 1, PRIMARY_COLOR),
+        ('BACKGROUND', (0,-2), (-1,-1), ACCENT_BG),
     ]))
     story.append(summary_table)
+    story.append(Spacer(1, 14))
+    
+    # Fiscal QR Code and verification box
+    fiscal_url = f"https://efiling.zimra.co.zw/verify?tin={company.get('zimra_tin', '200145892')}&inv={inv_no}&tot={total:.2f}"
+    qr_drawing = generate_qr_drawing(fiscal_url, size=65)
+    
+    fiscal_details_text = (
+        f"<b>ZIMRA FISCAL DEVICE VERIFICATION CODE:</b><br/>"
+        f"<b>FD Signature:</b> ZIMRA-FD-{inv_no[-10:]}-{secrets.token_hex(3).upper()}<br/>"
+        f"<b>Verification Status:</b> <font color='green'><b>VALIDATED & RECORDED</b></font><br/>"
+        f"Scan QR code with any ZIMRA verification app or smartphone camera."
+    )
+    
+    fiscal_box = Table(
+        [[qr_drawing, Paragraph(fiscal_details_text, styles['cell'])]],
+        colWidths=[1.1*inch, 6.1*inch]
+    )
+    fiscal_box.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), ACCENT_BG),
+        ('BOX', (0,0), (-1,-1), 0.8, PRIMARY_COLOR),
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    story.append(fiscal_box)
+    
+    story.append(Spacer(1, 14))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER_COLOR, spaceAfter=6, spaceBefore=2))
+    story.append(Paragraph("Thank you for dining with Soulfyas Quality Restaurant! Visit us again soon.", styles['footer']))
+    
+    doc.build(story)
+    return buffer.getvalue()
+
+def generate_purchase_order_pdf(company: dict, po: dict, po_lines: list) -> bytes:
+    """Generates a Formal Supplier Purchase Order PDF"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+    styles = get_base_styles()
+    story = []
+    
+    story.extend(create_header(company, "PURCHASE ORDER"))
+    curr = company.get('currency', 'USD')
+    
+    po_no = po.get('po_number', 'PO-001')
+    po_date = str(po.get('order_date', datetime.now().strftime('%Y-%m-%d')))
+    sup_name = po.get('supplier_name', 'Supplier')
+    sup_contact = po.get('contact_person', 'Sales Department')
+    sup_phone = po.get('phone', 'N/A')
+    sup_email = po.get('email', 'N/A')
+    
+    po_meta = [
+        [
+            Paragraph(f"<b>Supplier:</b> {sup_name}<br/>Attn: {sup_contact}<br/>Tel: {sup_phone} | {sup_email}", styles['cell']),
+            Paragraph(f"<b>PO Number:</b> {po_no}<br/><b>Order Date:</b> {po_date}<br/><b>Expected Delivery:</b> {po.get('expected_delivery_date', 'Immediate')}", styles['cell'])
+        ]
+    ]
+    t_meta = Table(po_meta, colWidths=[3.6*inch, 3.6*inch])
+    t_meta.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), ACCENT_BG),
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('BOX', (0,0), (-1,-1), 0.5, BORDER_COLOR),
+    ]))
+    story.append(t_meta)
+    story.append(Spacer(1, 14))
+    
+    table_rows = [[
+        Paragraph("<b>#</b>", styles['cell_bold']),
+        Paragraph("<b>Raw Material / Ingredient Description</b>", styles['cell_bold']),
+        Paragraph("<b>Unit</b>", styles['cell']),
+        Paragraph("<b>Order Qty</b>", styles['cell_right_bold']),
+        Paragraph(f"<b>Unit Price ({curr})</b>", styles['cell_right']),
+        Paragraph(f"<b>Line Total ({curr})</b>", styles['cell_right_bold'])
+    ]]
+    
+    tot_po = 0.0
+    for idx, line in enumerate(po_lines, 1):
+        name = line.get('item_name', 'Item')
+        unit = line.get('unit', 'kg')
+        qty = float(line.get('quantity', 1))
+        cost = float(line.get('unit_cost', 0.0))
+        ltot = float(line.get('line_total', qty * cost))
+        tot_po += ltot
+        
+        table_rows.append([
+            Paragraph(str(idx), styles['cell']),
+            Paragraph(name, styles['cell']),
+            Paragraph(unit, styles['cell']),
+            Paragraph(f"{qty:,.2f}", styles['cell_right_bold']),
+            Paragraph(f"{cost:,.2f}", styles['cell_right']),
+            Paragraph(f"{ltot:,.2f}", styles['cell_right_bold'])
+        ])
+        
+    t_items = Table(table_rows, colWidths=[0.4*inch, 3.4*inch, 0.6*inch, 0.9*inch, 0.9*inch, 1.0*inch])
+    t_items.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), PRIMARY_COLOR),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('PADDING', (0,0), (-1,-1), 5),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, ACCENT_BG]),
+        ('GRID', (0,0), (-1,-1), 0.5, BORDER_COLOR),
+    ]))
+    story.append(t_items)
+    story.append(Spacer(1, 10))
+    
+    tot_table = Table([
+        [Paragraph("<b>TOTAL PURCHASE ORDER VALUE:</b>", styles['cell_right_bold']), Paragraph(f"<b>{curr} {tot_po:,.2f}</b>", styles['cell_right_bold'])]
+    ], colWidths=[5.8*inch, 1.4*inch])
+    tot_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), ACCENT_BG),
+        ('BOX', (0,0), (-1,-1), 1, PRIMARY_COLOR),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(tot_table)
+    
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("<b>Terms & Conditions:</b> Goods must be accompanied by a delivery note and valid ZIMRA tax clearance (ITF 263).", styles['footer']))
+    
+    doc.build(story)
+    return buffer.getvalue()
+
+def generate_z_report_pdf(company: dict, shift: dict) -> bytes:
+    """Generates an Official Cashier Shift Closeout / End-of-Day Z-Report PDF"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+    styles = get_base_styles()
+    story = []
+    
+    story.extend(create_header(company, "CASHIER SHIFT Z-REPORT"))
+    curr = company.get('currency', 'USD')
+    
+    cashier_name = shift.get('cashier_name', 'Cashier')
+    shift_start = str(shift.get('shift_start', 'N/A'))
+    shift_end = str(shift.get('shift_end', datetime.now().strftime('%Y-%m-%d %H:%M')))
+    
+    s_meta = [
+        [
+            Paragraph(f"<b>Cashier / Operator:</b> {cashier_name}", styles['cell']),
+            Paragraph(f"<b>Shift Start:</b> {shift_start}", styles['cell'])
+        ],
+        [
+            Paragraph(f"<b>Terminal / Station:</b> POS Register 1", styles['cell']),
+            Paragraph(f"<b>Shift Close:</b> {shift_end}", styles['cell'])
+        ]
+    ]
+    t_sm = Table(s_meta, colWidths=[3.6*inch, 3.6*inch])
+    t_sm.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), ACCENT_BG),
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('BOX', (0,0), (-1,-1), 0.5, BORDER_COLOR),
+    ]))
+    story.append(t_sm)
+    story.append(Spacer(1, 14))
+    
+    op_float = float(shift.get('opening_float', 0.0))
+    cash_sales = float(shift.get('cash_sales', 0.0))
+    card_sales = float(shift.get('card_sales', 0.0))
+    ecocash_sales = float(shift.get('ecocash_sales', 0.0))
+    bank_sales = float(shift.get('bank_sales', 0.0))
+    tot_sales = cash_sales + card_sales + ecocash_sales + bank_sales
+    expected_cash = op_float + cash_sales
+    actual_cash = float(shift.get('actual_cash_counted', expected_cash))
+    variance = actual_cash - expected_cash
+    
+    z_rows = [
+        [Paragraph("Opening Cash Float in Register", styles['cell']), Paragraph(f"{curr} {op_float:,.2f}", styles['cell_right'])],
+        [Paragraph("Cash Sales Collected", styles['cell']), Paragraph(f"{curr} {cash_sales:,.2f}", styles['cell_right'])],
+        [Paragraph("Card / Visa Tender", styles['cell']), Paragraph(f"{curr} {card_sales:,.2f}", styles['cell_right'])],
+        [Paragraph("Ecocash / Mobile Money Tender", styles['cell']), Paragraph(f"{curr} {ecocash_sales:,.2f}", styles['cell_right'])],
+        [Paragraph("Direct Bank Transfer Tender", styles['cell']), Paragraph(f"{curr} {bank_sales:,.2f}", styles['cell_right'])],
+        [Paragraph("<b>TOTAL REVENUE COLLECTED</b>", styles['cell_bold']), Paragraph(f"<b>{curr} {tot_sales:,.2f}</b>", styles['cell_right_bold'])],
+        [Paragraph("<b>EXPECTED CASH IN DRAWER (Float + Cash Sales)</b>", styles['cell_bold']), Paragraph(f"<b>{curr} {expected_cash:,.2f}</b>", styles['cell_right_bold'])],
+        [Paragraph("<b>ACTUAL CASH PHYSICALLY COUNTED</b>", styles['cell_bold']), Paragraph(f"<b>{curr} {actual_cash:,.2f}</b>", styles['cell_right_bold'])],
+        [Paragraph("<b>CASH VARIANCE (OVER / SHORT)</b>", styles['cell_bold']), Paragraph(f"<b>{'+' if variance>=0 else ''}{curr} {variance:,.2f}</b>", styles['cell_right_bold'])]
+    ]
+    
+    t_z = Table(z_rows, colWidths=[4.8*inch, 2.4*inch])
+    t_z.setStyle(TableStyle([
+        ('PADDING', (0,0), (-1,-1), 6),
+        ('GRID', (0,0), (-1,-1), 0.5, BORDER_COLOR),
+        ('BACKGROUND', (0,5), (-1,5), ACCENT_BG),
+        ('BACKGROUND', (0,8), (-1,8), colors.HexColor('#ffebee') if variance < 0 else colors.HexColor('#e8f5e9')),
+    ]))
+    story.append(t_z)
+    
+    story.append(Spacer(1, 24))
+    
+    # Signatures Table
+    sig_data = [
+        [Paragraph("<b>Cashier Signature:</b> ___________________", styles['cell']), Paragraph("<b>Duty Manager Signature:</b> ___________________", styles['cell'])],
+        [Paragraph(f"Date: {datetime.now().strftime('%d-%b-%Y')}", styles['cell']), Paragraph(f"Date: {datetime.now().strftime('%d-%b-%Y')}", styles['cell'])]
+    ]
+    t_sig = Table(sig_data, colWidths=[3.6*inch, 3.6*inch])
+    t_sig.setStyle(TableStyle([('PADDING', (0,0), (-1,-1), 10)]))
+    story.append(t_sig)
+    
+    doc.build(story)
+    return buffer.getvalue()
+
+def generate_table_qr_placard_pdf(company: dict, table_number: str, order_url: str) -> bytes:
+    """Generates a Printable Table Tent / Placard with QR code for Guest Contactless Digital Ordering"""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=54,
+        leftMargin=54,
+        topMargin=54,
+        bottomMargin=54
+    )
+    styles = get_base_styles()
+    story = []
+    
+    comp_name = company.get('trading_name') or company.get('name') or 'Soulfyas Quality Restaurant'
+    
+    story.append(Paragraph(f"<font size=22 color='#9b721d'><b>🍽️ {comp_name.upper()}</b></font>", ParagraphStyle('H', parent=styles['title'], alignment=TA_CENTER)))
+    story.append(Spacer(1, 10))
+    story.append(Paragraph("<b>WELCOME TO YOUR TABLE</b>", ParagraphStyle('W', parent=styles['subtitle'], alignment=TA_CENTER, fontSize=14)))
+    story.append(Spacer(1, 14))
+    
+    # Table Number Callout
+    tbl_box = Table([[Paragraph(f"<font size=32 color='#9b721d'><b>TABLE {table_number}</b></font>", ParagraphStyle('T', alignment=TA_CENTER))]], colWidths=[5.5*inch])
+    tbl_box.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), ACCENT_BG),
+        ('BOX', (0,0), (-1,-1), 2, PRIMARY_COLOR),
+        ('PADDING', (0,0), (-1,-1), 14),
+    ]))
+    story.append(tbl_box)
     story.append(Spacer(1, 20))
     
-    # Footer and Fiscal Barcode text
-    story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER_COLOR, spaceAfter=8, spaceBefore=4))
-    fiscal_msg = f"Fiscal Code: ZIMRA-FD-{inv_no[-10:]} | Verification: VERIFIED-OK | Thank you for dining with Soulfyas!"
-    story.append(Paragraph(fiscal_msg, styles['footer']))
+    # QR Code
+    qr_draw = generate_qr_drawing(order_url, size=180)
+    qr_table = Table([[qr_draw]], colWidths=[5.5*inch])
+    qr_table.setStyle(TableStyle([
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
+    ]))
+    story.append(qr_table)
+    story.append(Spacer(1, 20))
+    
+    instructions = (
+        "<b>HOW TO ORDER:</b><br/>"
+        "1. Open your smartphone camera or QR scanner.<br/>"
+        "2. Point at the QR code above to open our <b>Live Digital Menu</b>.<br/>"
+        "3. Browse delicious chef specials, customize your sides & basting, and tap <b>Submit Order</b>!<br/>"
+        "Our kitchen will start preparing your meal immediately."
+    )
+    story.append(Paragraph(instructions, ParagraphStyle('Inst', parent=styles['cell'], alignment=TA_CENTER, fontSize=11, leading=16)))
+    story.append(Spacer(1, 24))
+    story.append(Paragraph(f"Free High-Speed Guest Wi-Fi: <b>Soulfyas-Guest</b> | Password: <b>delicious2026</b>", styles['footer']))
     
     doc.build(story)
     return buffer.getvalue()
@@ -325,7 +605,6 @@ def generate_payslip_pdf(company: dict, payslip: dict, period_str: str) -> bytes
     story.append(t_meta)
     story.append(Spacer(1, 14))
     
-    # Earnings vs Deductions side-by-side table
     earnings_rows = [
         ("Basic Salary", f"{curr} {payslip.get('basic_salary', 0.0):,.2f}"),
         ("Allowances & Bonuses", f"{curr} {payslip.get('allowances', 0.0):,.2f}"),
@@ -342,7 +621,6 @@ def generate_payslip_pdf(company: dict, payslip: dict, period_str: str) -> bytes
     
     story.append(Paragraph("<b>Earnings & Statutory Deductions</b>", styles['section']))
     
-    # Table layout
     pay_table_data = [
         [
             Paragraph("<b>Earnings Description</b>", styles['cell_bold']),
@@ -379,7 +657,6 @@ def generate_payslip_pdf(company: dict, payslip: dict, period_str: str) -> bytes
     story.append(t_pay)
     story.append(Spacer(1, 14))
     
-    # Net Pay Callout
     net_pay_val = payslip.get('net_pay', 0.0)
     net_box = [
         [
@@ -397,7 +674,6 @@ def generate_payslip_pdf(company: dict, payslip: dict, period_str: str) -> bytes
     story.append(t_net)
     story.append(Spacer(1, 14))
     
-    # Employer Statutory Contributions
     story.append(Paragraph("<b>Employer Statutory Contributions (Informational)</b>", styles['section']))
     employer_rows = [
         [

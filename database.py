@@ -1,12 +1,14 @@
 """
 Database Manager and Schema Engine for Soulfyas Quality Restaurant ERP
 Supports both PostgreSQL (Neon Cloud) and SQLite (Local / Dev) with unified API,
-automatic migration, inventory stock deduction on sale, audit logging, and seed data.
+automatic migration, inventory stock deduction on sale, audit logging, multi-currency exchange rates,
+dish modifiers, purchase orders, cashier shifts, and staff attendance.
 """
 
 import os
 import bcrypt
 import pandas as pd
+from datetime import date, datetime
 from sqlalchemy import create_engine, text
 
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -18,7 +20,6 @@ if not DATABASE_URL:
         DATABASE_URL = None
 
 if not DATABASE_URL or DATABASE_URL.strip() == '':
-    # Fallback to local SQLite database file for seamless local execution
     DATABASE_URL = 'sqlite:///restaurant.db'
 elif DATABASE_URL.startswith('postgresql://'):
     DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+psycopg://', 1)
@@ -98,7 +99,7 @@ def init_db():
             active BOOLEAN DEFAULT TRUE
         );
         """,
-        # Organisation Units (Directorates & Departments)
+        # Organisation Units
         f"""
         CREATE TABLE IF NOT EXISTS organisation_units (
             id {pk_type},
@@ -153,7 +154,7 @@ def init_db():
             created_at {timestamp_type}
         );
         """,
-        # Chart of Accounts (IFRS)
+        # Chart of Accounts
         f"""
         CREATE TABLE IF NOT EXISTS accounts (
             id {pk_type},
@@ -166,7 +167,7 @@ def init_db():
             active BOOLEAN DEFAULT TRUE
         );
         """,
-        # Tax Configuration Codes
+        # Tax Codes
         f"""
         CREATE TABLE IF NOT EXISTS tax_codes (
             id {pk_type},
@@ -178,7 +179,19 @@ def init_db():
             active BOOLEAN DEFAULT TRUE
         );
         """,
-        # Restaurant Tables / Floor Layout
+        # Multi-Currency Exchange Rates
+        f"""
+        CREATE TABLE IF NOT EXISTS exchange_rates (
+            id {pk_type},
+            company_id BIGINT NOT NULL,
+            base_currency TEXT NOT NULL DEFAULT 'USD',
+            target_currency TEXT NOT NULL,
+            rate NUMERIC(18,6) NOT NULL,
+            effective_date DATE NOT NULL,
+            is_current BOOLEAN DEFAULT TRUE
+        );
+        """,
+        # Restaurant Tables
         f"""
         CREATE TABLE IF NOT EXISTS tables (
             id {pk_type},
@@ -190,7 +203,7 @@ def init_db():
             status TEXT DEFAULT 'Available'
         );
         """,
-        # Menu Categories & Items
+        # Menu Items
         f"""
         CREATE TABLE IF NOT EXISTS menu_items (
             id {pk_type},
@@ -203,6 +216,20 @@ def init_db():
             is_vegetarian BOOLEAN DEFAULT FALSE,
             is_spicy BOOLEAN DEFAULT FALSE,
             prep_time_mins INTEGER DEFAULT 15,
+            active BOOLEAN DEFAULT TRUE
+        );
+        """,
+        # Dish Modifiers & Add-ons
+        f"""
+        CREATE TABLE IF NOT EXISTS dish_modifiers (
+            id {pk_type},
+            company_id BIGINT NOT NULL,
+            name TEXT NOT NULL,
+            group_name TEXT NOT NULL,
+            additional_price NUMERIC(18,2) DEFAULT 0.0,
+            cost NUMERIC(18,2) DEFAULT 0.0,
+            inventory_item_id BIGINT,
+            inventory_deduct_qty NUMERIC(18,4) DEFAULT 0.0,
             active BOOLEAN DEFAULT TRUE
         );
         """,
@@ -230,7 +257,7 @@ def init_db():
             category TEXT DEFAULT 'General'
         );
         """,
-        # Inventory & Raw Materials
+        # Inventory
         f"""
         CREATE TABLE IF NOT EXISTS inventory (
             id {pk_type},
@@ -244,7 +271,7 @@ def init_db():
             supplier_id BIGINT
         );
         """,
-        # Recipes (Bill of Materials)
+        # Recipes
         f"""
         CREATE TABLE IF NOT EXISTS recipes (
             id {pk_type},
@@ -287,7 +314,7 @@ def init_db():
             created_at {timestamp_type}
         );
         """,
-        # Sale Line Items
+        # Sale Lines
         f"""
         CREATE TABLE IF NOT EXISTS sale_lines (
             id {pk_type},
@@ -299,7 +326,7 @@ def init_db():
             notes TEXT DEFAULT ''
         );
         """,
-        # Kitchen Display System (KDS) Active Orders
+        # Kitchen Orders
         f"""
         CREATE TABLE IF NOT EXISTS kitchen_orders (
             id {pk_type},
@@ -312,7 +339,67 @@ def init_db():
             created_at {timestamp_type}
         );
         """,
-        # Stock Movements Audit Trail
+        # Cashier Shifts & Z-Reports
+        f"""
+        CREATE TABLE IF NOT EXISTS cashier_shifts (
+            id {pk_type},
+            company_id BIGINT NOT NULL,
+            branch_id BIGINT,
+            user_id BIGINT NOT NULL,
+            shift_start {timestamp_type},
+            shift_end {timestamp_type},
+            opening_float NUMERIC(18,2) DEFAULT 0.0,
+            cash_sales NUMERIC(18,2) DEFAULT 0.0,
+            card_sales NUMERIC(18,2) DEFAULT 0.0,
+            ecocash_sales NUMERIC(18,2) DEFAULT 0.0,
+            bank_sales NUMERIC(18,2) DEFAULT 0.0,
+            actual_cash_counted NUMERIC(18,2) DEFAULT 0.0,
+            variance NUMERIC(18,2) DEFAULT 0.0,
+            status TEXT DEFAULT 'open',
+            notes TEXT DEFAULT ''
+        );
+        """,
+        # Purchase Orders
+        f"""
+        CREATE TABLE IF NOT EXISTS purchase_orders (
+            id {pk_type},
+            company_id BIGINT NOT NULL,
+            po_number TEXT UNIQUE NOT NULL,
+            supplier_id BIGINT NOT NULL,
+            order_date DATE NOT NULL,
+            expected_delivery_date DATE,
+            subtotal NUMERIC(18,2) DEFAULT 0.0,
+            tax NUMERIC(18,2) DEFAULT 0.0,
+            total NUMERIC(18,2) DEFAULT 0.0,
+            status TEXT DEFAULT 'Draft',
+            created_by BIGINT,
+            created_at {timestamp_type}
+        );
+        """,
+        f"""
+        CREATE TABLE IF NOT EXISTS purchase_order_lines (
+            id {pk_type},
+            po_id BIGINT NOT NULL,
+            inventory_item_id BIGINT NOT NULL,
+            quantity NUMERIC(18,4) NOT NULL,
+            unit_cost NUMERIC(18,2) NOT NULL,
+            line_total NUMERIC(18,2) NOT NULL
+        );
+        """,
+        # Staff Attendance
+        f"""
+        CREATE TABLE IF NOT EXISTS staff_attendance (
+            id {pk_type},
+            company_id BIGINT NOT NULL,
+            employee_id BIGINT NOT NULL,
+            work_date DATE NOT NULL,
+            clock_in TIME,
+            clock_out TIME,
+            hours_worked NUMERIC(6,2) DEFAULT 8.0,
+            status TEXT DEFAULT 'Present'
+        );
+        """,
+        # Stock Movements
         f"""
         CREATE TABLE IF NOT EXISTS stock_movements (
             id {pk_type},
@@ -346,7 +433,7 @@ def init_db():
             created_by BIGINT
         );
         """,
-        # General Ledger Journals & Journal Lines
+        # Journals & Lines
         f"""
         CREATE TABLE IF NOT EXISTS journals (
             id {pk_type},
@@ -369,7 +456,7 @@ def init_db():
             credit NUMERIC(18,2) DEFAULT 0.0
         );
         """,
-        # Payroll Runs & Payslip Records
+        # Payroll
         f"""
         CREATE TABLE IF NOT EXISTS payroll_runs (
             id {pk_type},
@@ -402,7 +489,7 @@ def init_db():
             net_pay NUMERIC(18,2) DEFAULT 0.0
         );
         """,
-        # Tax Returns & Filings
+        # Tax Returns
         f"""
         CREATE TABLE IF NOT EXISTS tax_returns (
             id {pk_type},
@@ -417,7 +504,7 @@ def init_db():
             filed_at {timestamp_type}
         );
         """,
-        # Central Audit Log
+        # Audit Log
         f"""
         CREATE TABLE IF NOT EXISTS audit_log (
             id {pk_type},
@@ -443,10 +530,20 @@ def seed_default_data():
     with engine.begin() as conn:
         comp_count = conn.execute(text("SELECT COUNT(*) FROM companies")).scalar_one()
         if comp_count > 0:
+            # Seed modifiers and exchange rates if not present
+            try:
+                mod_count = conn.execute(text("SELECT COUNT(*) FROM dish_modifiers")).scalar_one()
+                if mod_count == 0:
+                    seed_modifiers(conn, 1)
+                rate_count = conn.execute(text("SELECT COUNT(*) FROM exchange_rates")).scalar_one()
+                if rate_count == 0:
+                    seed_rates(conn, 1)
+            except Exception:
+                pass
             return
             
         # 1. Company
-        c_res = conn.execute(text("""
+        conn.execute(text("""
             INSERT INTO companies(name, trading_name, legal_name, address, phone, email, website, country, timezone, zimra_tin, vat_number, nssa_number, currency)
             VALUES('Soulfyas Quality Restaurant', 'Soulfyas Quality Restaurant', 'Soulfyas Investments (Pvt) Ltd',
                    '123 Samora Machel Avenue, Harare, Zimbabwe', '+263 242 700000', 'info@soulfyas.co.zw', 'https://soulfyas.co.zw',
@@ -464,7 +561,7 @@ def seed_default_data():
                   (:c, 'Bulawayo City Branch', 'BYO-01', '45 Jason Moyo St, Bulawayo', '+263 292 600000', 0, 1)
         """), {'c': cid})
         
-        # 3. Directorates & Departments (from production_expansion.sql)
+        # 3. Directorates
         dirs = [
             ('Finance', 'Directorate', 'Financial management and statutory reporting'),
             ('Operations', 'Directorate', 'Restaurant operations, kitchen, and bar'),
@@ -479,7 +576,7 @@ def seed_default_data():
                 VALUES(:c, :n, :t, :d, 1)
             """), {'c': cid, 'n': name, 't': utype, 'd': desc})
             
-        # 4. Users (Admin, Manager, Cashier, Chef, Accountant)
+        # 4. Users
         pw_admin = hash_pw('ChangeMe123!')
         pw_user = hash_pw('Soulfyas2026!')
         
@@ -511,9 +608,8 @@ def seed_default_data():
                 VALUES(:c, :eno, :fn, :nid, :nssa, :jt, :sal, :al, :hd, 1)
             """), {'c': cid, 'eno': eno, 'fn': fname, 'nid': nid, 'nssa': nssa_no, 'jt': jtitle, 'sal': sal, 'al': allow, 'hd': hdate})
             
-        # 6. Chart of Accounts (IFRS 18 Compliant)
+        # 6. Chart of Accounts
         accounts_data = [
-            # Assets
             ('1000', 'Cash on Hand (POS Drawer)', 'asset', 'Operating'),
             ('1010', 'Petty Cash', 'asset', 'Operating'),
             ('1100', 'Stanbic Bank Operating USD', 'asset', 'Financing'),
@@ -522,21 +618,17 @@ def seed_default_data():
             ('1300', 'Trade Receivables & Customer Balances', 'asset', 'Operating'),
             ('1500', 'Kitchen & Restaurant Equipment', 'asset', 'Investing'),
             ('1550', 'Accumulated Depreciation - Equipment', 'asset', 'Investing'),
-            # Liabilities
             ('2000', 'Trade Payables (Suppliers)', 'liability', 'Operating'),
             ('2100', 'ZIMRA VAT Output Payable', 'liability', 'Operating'),
             ('2110', 'ZIMRA VAT Input Receivable', 'asset', 'Operating'),
             ('2200', 'PAYE & AIDS Levy Payable', 'liability', 'Operating'),
             ('2210', 'NSSA POBS & APWCS Payable', 'liability', 'Operating'),
             ('2300', 'Accrued Operating Expenses', 'liability', 'Operating'),
-            # Equity
             ('3000', 'Share Capital', 'equity', 'Financing'),
             ('3100', 'Retained Earnings', 'equity', 'Financing'),
-            # Revenue
             ('4000', 'Restaurant Food Sales', 'revenue', 'Operating'),
             ('4100', 'Bar & Beverage Sales', 'revenue', 'Operating'),
             ('4200', 'Catering & Event Revenue', 'revenue', 'Operating'),
-            # Expenses
             ('5000', 'Cost of Food & Ingredients (COGS)', 'expense', 'Operating'),
             ('5100', 'Cost of Beverages Sold', 'expense', 'Operating'),
             ('6000', 'Salaries, Wages & Benefits', 'expense', 'Operating'),
@@ -609,7 +701,7 @@ def seed_default_data():
                 VALUES(:c, :n, :p, :e, :pts, :nt)
             """), {'c': cid, 'n': cname, 'p': cphone, 'e': cemail, 'pts': cpts, 'nt': cnotes})
             
-        # 11. Inventory (Raw Ingredients)
+        # 11. Inventory
         inv_data = [
             ('Whole Chicken (Fresh)', 'Poultry', 'kg', 120.0, 25.0, 3.80, 1),
             ('Beef Rump & Chuck Steak', 'Meat', 'kg', 85.0, 20.0, 6.50, 2),
@@ -650,10 +742,7 @@ def seed_default_data():
                 VALUES(:c, :n, :cat, :d, :p, :co, :v, :s, :pt, 1)
             """), {'c': cid, 'n': mname, 'cat': mcat, 'd': mdesc, 'p': mprice, 'co': mcost, 'v': is_veg, 's': is_spicy, 'pt': ptime})
             
-        # 13. Recipes (Linking Menu Items to Raw Ingredients)
-        # Full Chicken -> 1.2kg Whole Chicken + 0.08kg Spices + 0.05L Oil
-        # Sadza & Beef Stew -> 0.35kg Beef + 0.25kg Roller Meal + 0.1kg Tomato + 0.05kg Onion
-        # Burger -> 1 pack buns + 0.25kg beef + 0.05kg cheese
+        # 13. Recipes
         recipes = [
             (1, [(1, 1.2, 'kg'), (9, 0.08, 'kg'), (5, 0.05, 'litres')]),
             (2, [(1, 0.6, 'kg'), (8, 0.3, 'kg'), (9, 0.04, 'kg'), (5, 0.1, 'litres')]),
@@ -681,49 +770,72 @@ def seed_default_data():
                     VALUES(:r, :inv, :q, :u)
                 """), {'r': rec_id, 'inv': inv_id, 'q': qty_used, 'u': u})
                 
-        # 14. Sample Historical Sales
-        sample_sales = [
-            ('SQR-20261001-001', '2026-10-01', 1, 1, 'Dine-In', 'Cash', 39.00, 5.85, 0.0, 2.0, 46.85, 1,
-             [(1, 1, 18.00, 18.00), (3, 1, 8.50, 8.50), (8, 3, 2.50, 7.50), (9, 2, 2.50, 5.00)]),
-            ('SQR-20261001-002', '2026-10-01', 2, 2, 'Dine-In', 'Card', 27.00, 4.05, 0.0, 0.0, 31.05, 1,
-             [(4, 1, 16.00, 16.00), (2, 1, 11.00, 11.00)]),
-            ('SQR-20260930-001', '2026-09-30', 3, 9, 'Dine-In', 'Bank transfer', 145.00, 21.75, 10.0, 15.0, 171.75, 1,
-             [(1, 4, 18.00, 72.00), (4, 3, 16.00, 48.00), (8, 10, 2.50, 25.00)])
-        ]
-        for inv_no, sdate, cid_cust, tbl_id, otype, pmethod, sub, tax_amt, disc, tip_amt, tot, uid, lines in sample_sales:
-            conn.execute(text("""
-                INSERT INTO sales(company_id, branch_id, invoice_no, sale_date, customer_id, table_id, order_type, payment_method, subtotal, discount, tax, tip, total, status, kitchen_status, created_by)
-                VALUES(:c, 1, :inv, :sd, :cust, :tb, :ot, :pm, :sub, :dc, :tx, :tp, :tot, 'Paid', 'Completed', :u)
-            """), {'c': cid, 'inv': inv_no, 'sd': sdate, 'cust': cid_cust, 'tb': tbl_id, 'ot': otype, 'pm': pmethod, 'sub': sub, 'dc': disc, 'tx': tax_amt, 'tp': tip_amt, 'tot': tot, 'u': uid})
-            if IS_SQLITE:
-                sid = conn.execute(text("SELECT last_insert_rowid()")).scalar_one()
-            else:
-                sid = conn.execute(text("SELECT id FROM sales ORDER BY id DESC LIMIT 1")).scalar_one()
-                
-            for mi_id, qty, uprice, ltot in lines:
-                conn.execute(text("""
-                    INSERT INTO sale_lines(sale_id, item_id, quantity, unit_price, line_total)
-                    VALUES(:sid, :mi, :q, :up, :lt)
-                """), {'sid': sid, 'mi': mi_id, 'q': qty, 'up': uprice, 'lt': ltot})
-                
-        # 15. Sample Expenses
-        sample_exp = [
-            ('2026-10-01', 'Food Supplies', 'Purchase fresh whole chickens from Irvines', 456.00, 'Irvines Zimbabwe', 1, 5, 'Bank transfer', 1),
-            ('2026-10-01', 'Utilities', 'Harare City Council water and municipal rates', 180.00, 'City of Harare', None, 18, 'Bank transfer', 1),
-            ('2026-09-30', 'Beverage Restock', 'Delta Beverages beer and soda restock', 320.00, 'Delta Beverages', 4, 6, 'Bank transfer', 1),
-            ('2026-09-29', 'Kitchen Consumables', 'Eco-friendly takeaway packaging and serviettes', 75.00, 'Packaging World', None, 19, 'Cash', 1)
-        ]
-        for edate, ecat, edesc, eamt, esup, esupid, eaccid, epmethod, euid in sample_exp:
-            conn.execute(text("""
-                INSERT INTO expenses(company_id, branch_id, expense_date, category, description, amount, supplier, supplier_id, account_id, payment_method, tax_deductible, created_by)
-                VALUES(:c, 1, :ed, :cat, :desc, :amt, :sup, :sid, :aid, :pm, 1, :u)
-            """), {'c': cid, 'ed': edate, 'cat': ecat, 'desc': edesc, 'amt': eamt, 'sup': esup, 'sid': esupid, 'aid': eaccid, 'pm': epmethod, 'u': euid})
-            
+        # 14. Seed Modifiers & Rates
+        seed_modifiers(conn, cid)
+        seed_rates(conn, cid)
+        
+        # 15. Initial Open Cashier Shift
+        conn.execute(text("""
+            INSERT INTO cashier_shifts(company_id, branch_id, user_id, shift_start, opening_float, cash_sales, card_sales, ecocash_sales, bank_sales, status)
+            VALUES(:c, 1, 3, :start_time, 100.0, 45.0, 27.0, 0.0, 0.0, 'open')
+        """), {'c': cid, 'start_time': datetime.now()})
+        
         # 16. Audit Log Initial Entry
         conn.execute(text("""
             INSERT INTO audit_log(company_id, user_id, action, entity, entity_id, detail)
-            VALUES(:c, 1, 'SYSTEM_INIT', 'System', 1, 'Initialized Soulfyas Quality Restaurant ERP normalized database with seed data.')
+            VALUES(:c, 1, 'SYSTEM_INIT', 'System', 1, 'Initialized Soulfyas Quality Restaurant ERP normalized database with multi-currency & modifiers.')
         """), {'c': cid})
+
+def seed_modifiers(conn, cid):
+    """Seeds dish modifiers for customizations, basting, and add-on sides"""
+    modifiers = [
+        # Side Choices
+        ('Traditional Sadza Portion', 'Side Choice', 0.00, 0.35, 4, 0.3),
+        ('Crispy Potato Chips', 'Side Choice', 1.00, 0.60, 8, 0.3),
+        ('Savory Yellow Rice', 'Side Choice', 0.00, 0.40, None, 0.0),
+        ('Fresh Garden Salad', 'Side Choice', 0.50, 0.45, 6, 0.15),
+        # Basting / Heat Levels
+        ('Mild Lemon & Herb Basting', 'Basting & Heat', 0.00, 0.10, None, 0.0),
+        ('Medium Peri-Peri Sauce', 'Basting & Heat', 0.00, 0.15, 9, 0.03),
+        ('Extra Hot Flame Peri-Peri', 'Basting & Heat', 0.00, 0.20, 9, 0.05),
+        ('Smokey BBQ Glaze', 'Basting & Heat', 0.00, 0.15, None, 0.0),
+        # Add-on Toppings
+        ('Melted Cheddar Cheese Slice', 'Add-on Topping', 1.50, 0.40, 13, 0.05),
+        ('Fried Free-Range Egg', 'Add-on Topping', 1.00, 0.30, None, 0.0),
+        ('Creamy Garlic Mushroom Sauce', 'Add-on Topping', 2.50, 0.70, None, 0.0),
+        ('Grilled Beef Bacon Rashers', 'Add-on Topping', 2.00, 0.80, 2, 0.1)
+    ]
+    for name, grp, add_p, cost, inv_id, inv_qty in modifiers:
+        conn.execute(text("""
+            INSERT INTO dish_modifiers(company_id, name, group_name, additional_price, cost, inventory_item_id, inventory_deduct_qty, active)
+            VALUES(:c, :n, :g, :p, :co, :iid, :iq, 1)
+        """), {'c': cid, 'n': name, 'g': grp, 'p': add_p, 'co': cost, 'iid': inv_id, 'iq': inv_qty})
+
+def seed_rates(conn, cid):
+    """Seeds official foreign exchange and RBZ ZiG rates"""
+    today_d = str(date.today())
+    rates = [
+        ('USD', 'ZiG', 28.50),
+        ('USD', 'ZAR', 18.20),
+        ('USD', 'EUR', 0.92),
+        ('USD', 'GBP', 0.78)
+    ]
+    for base, tgt, r in rates:
+        conn.execute(text("""
+            INSERT INTO exchange_rates(company_id, base_currency, target_currency, rate, effective_date, is_current)
+            VALUES(:c, :b, :t, :r, :d, 1)
+        """), {'c': cid, 'b': base, 't': tgt, 'r': r, 'd': today_d})
+
+def get_current_rate(company_id: int, target_currency: str = 'ZiG') -> float:
+    """Retrieves current active exchange rate for a target currency against USD"""
+    res = read("""
+        SELECT rate FROM exchange_rates
+        WHERE company_id = :c AND target_currency = :t AND is_current = 1
+        ORDER BY id DESC LIMIT 1
+    """, {'c': company_id, 't': target_currency})
+    if len(res):
+        return float(res.iloc[0]['rate'])
+    return 28.50 if target_currency == 'ZiG' else 1.0
 
 def deduct_inventory_for_sale(company_id: int, sale_id: int, user_id: int = 1):
     """
@@ -776,11 +888,10 @@ def deduct_inventory_for_sale(company_id: int, sale_id: int, user_id: int = 1):
                         'u': user_id
                     })
     except Exception as e:
-        # Don't fail the sale if stock deduction runs into an error, but log it
         print(f"Stock deduction warning: {e}")
 
 def log_audit(company_id: int, user_id: int, action: str, entity: str, entity_id: int, detail: str):
-    """Records an audit trail event"""
+    """Records an immutable audit trail event"""
     try:
         run("""
             INSERT INTO audit_log(company_id, user_id, action, entity, entity_id, detail)

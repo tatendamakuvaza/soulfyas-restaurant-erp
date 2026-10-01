@@ -1,6 +1,7 @@
 """
-Zimbabwe Tax & Statutory Payroll Calculation Engine for Soulfyas Quality Restaurant ERP
-Calculates PAYE, AIDS Levy, NSSA POBS, NSSA APWCS, VAT, and IMTT in accordance with ZIMRA and NSSA regulations.
+Zimbabwe Tax, Statutory Payroll & Multi-Currency Engine for Soulfyas Quality Restaurant ERP
+Calculates PAYE, AIDS Levy, NSSA POBS, NSSA APWCS, VAT, IMTT, Dual-Currency Conversions,
+and Tronc Tip Distribution in accordance with ZIMRA, RBZ and NSSA regulations.
 """
 
 def calculate_paye(monthly_gross: float) -> dict:
@@ -106,3 +107,34 @@ def calculate_vat(amount_exclusive: float, vat_rate: float = 0.15) -> dict:
         'inclusive': total_inclusive,
         'rate_percentage': round(vat_rate * 100, 1)
     }
+
+def convert_currency(amount: float, rate: float, to_target: bool = True) -> float:
+    """
+    Converts amount between USD base and target currency (e.g. ZiG, ZAR) using exchange rate.
+    """
+    if to_target:
+        return round(float(amount) * float(rate), 2)
+    else:
+        return round(float(amount) / float(rate), 2) if float(rate) > 0 else 0.0
+
+def calculate_tronc_distribution(total_tips: float, staff_records: list) -> list:
+    """
+    Distributes collected tips across staff based on hours worked during the service period.
+    staff_records: list of dicts with 'employee_id', 'employee_name', 'hours_worked', 'role'
+    """
+    total_hours = sum(float(s.get('hours_worked', 0)) for s in staff_records)
+    if total_hours <= 0 or total_tips <= 0:
+        return [{**s, 'tip_payout': 0.0, 'hourly_tip_rate': 0.0} for s in staff_records]
+        
+    rate_per_hour = total_tips / total_hours
+    results = []
+    for s in staff_records:
+        hrs = float(s.get('hours_worked', 0))
+        payout = round(hrs * rate_per_hour, 2)
+        results.append({
+            **s,
+            'hours_worked': hrs,
+            'hourly_tip_rate': round(rate_per_hour, 2),
+            'tip_payout': payout
+        })
+    return results
