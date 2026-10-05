@@ -35,14 +35,15 @@ from reportlab.platypus.tableofcontents import TableOfContents
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MANUSCRIPT = os.path.join(ROOT, "manuscript")
-OUTPUT = os.path.join(ROOT, "Big-Data-Analytics-and-Machine-Learning.pdf")
+OUTPUT = os.path.join(ROOT, "Practical-Data-Analysts-Handbook.pdf")
 FONTS = os.path.join(ROOT, "assets", "fonts")
 COVER = os.path.join(ROOT, "assets", "cover.jpg")
 
-BOOK_TITLE = "Big Data Analytics and Machine Learning"
-BOOK_SHORT = "Big Data Analytics & Machine Learning"
-BOOK_SUBTITLE = ("The Complete Practitioner's Course: From SQL, Excel and SPSS "
-                 "to Spark, Deep Learning and Production AI")
+BOOK_TITLE = "The Practical Data Analyst's Handbook"
+BOOK_SHORT = "The Practical Data Analyst's Handbook"
+BOOK_SUBTITLE = ("From Zero to Your First Data Job — A Complete "
+                 "Beginner's Course in Excel, SQL, Statistics, Python "
+                 "and Power BI")
 AUTHOR = "Tatenda Makuvaza"
 AUTHOR_TAG = "The Big Data Analyst"
 YEAR = "2026"
@@ -63,18 +64,15 @@ GRID = HexColor("#e2e0d6")
 GRAY = HexColor("#6b7280")
 
 PARTS = [
-    ("Part I",    "Foundations of Big Data Analytics",                 1,  5),
-    ("Part II",   "Data Engineering for Analysts",                    6,  11),
-    ("Part III",  "Mathematics and Statistics for Machine Learning",  12, 16),
-    ("Part IV",   "Visualization and Business Intelligence",          17, 20),
-    ("Part V",    "Machine Learning Foundations",                     21, 29),
-    ("Part VI",   "Advanced Machine Learning",                        30, 36),
-    ("Part VII",  "Big Data Technologies and the Cloud",              37, 41),
-    ("Part VIII", "From Insight to Impact",                           42, 45),
-    ("Part IX",   "The Extended Curriculum: Special Topics and the Craft of Teaching", 46, 50),
-    ("Part X",    "Analytics Across Industries: Domain Playbooks",     51, 60),
-    ("Part XI",   "The Frontier: Advanced Methods and Emerging Practice", 61, 70),
-    ("Part XII",  "The Practitioner's Path: Projects, Clients and the Craft of Delivery", 71, 80),
+    ("Part I",   "Beginning: You, the Data Analyst",              1,  5),
+    ("Part II",  "Excel: Your First Superpower",                  6,  13),
+    ("Part III", "SQL: The Language of Data",                     14, 21),
+    ("Part IV",  "Statistics Without Fear",                       22, 29),
+    ("Part V",   "Python: From Zero to Dangerous",                30, 37),
+    ("Part VI",  "Dashboards and Storytelling with Power BI",     38, 43),
+    ("Part VII", "Real Projects and Your Portfolio",              44, 49),
+    ("Part VIII","Getting the Job",                               50, 56),
+    ("Part IX",  "Beyond the Basics",                             57, 62),
 ]
 
 # ---------------------------------------------------------------------------
@@ -434,29 +432,21 @@ def paint_cover(canv, doc):
 
     center = PAGE_W / 2.0
 
-    canv.setFillColor(HexColor("#e8d9a0"))
+    canv.setFillColor(HexColor("#f5d9a8"))
     canv.setFont("Sans", 9)
-    canv.drawCentredString(center, PAGE_H - 2.55 * inch, "THE COMPLETE PRACTITIONER'S COURSE",
+    canv.drawCentredString(center, PAGE_H - 2.55 * inch, "A COMPLETE BEGINNER'S COURSE",
                            charSpace=3)
 
     canv.setFillColor(white)
-    canv.setFont("Sans-B", 29)
-    canv.drawCentredString(center, PAGE_H - 3.15 * inch, "Big Data Analytics")
-    canv.setFont("Sans-B", 29)
-    amp = "&"
-    rest = " Machine Learning"
-    w_amp = canv.stringWidth(amp, "Sans-B", 29)
-    w_rest = canv.stringWidth(rest, "Sans-B", 29)
-    start = center - (w_amp + w_rest) / 2.0
+    canv.setFont("Sans-B", 27)
+    canv.drawCentredString(center, PAGE_H - 3.12 * inch, "The Practical")
     canv.setFillColor(GOLD)
-    canv.drawString(start, PAGE_H - 3.62 * inch, amp)
-    canv.setFillColor(white)
-    canv.drawString(start + w_amp, PAGE_H - 3.62 * inch, rest)
+    canv.drawCentredString(center, PAGE_H - 3.58 * inch, "Data Analyst's Handbook")
 
-    canv.setFillColor(HexColor("#d7e3f4"))
+    canv.setFillColor(HexColor("#d9efe9"))
     canv.setFont("Sans", 9.6)
-    canv.drawCentredString(center, PAGE_H - 4.35 * inch, "From SQL, Excel and SPSS to Spark, Deep Learning")
-    canv.drawCentredString(center, PAGE_H - 4.62 * inch, "and Production AI")
+    canv.drawCentredString(center, PAGE_H - 4.35 * inch, "From Zero to Your First Data Job in")
+    canv.drawCentredString(center, PAGE_H - 4.62 * inch, "Excel, SQL, Statistics, Python and Power BI")
 
     canv.setFillColor(GOLD)
     canv.rect(center - 45, PAGE_H - 5.25 * inch, 90, 2.5, stroke=0, fill=1)
@@ -640,8 +630,6 @@ def main():
         "build_pdf.py (ReportLab): 7 x 10 inch textbook trim, running headers, "
         "a linked table of contents, and PDF outline bookmarks.\n\n"
         "- Edition: First Edition, %s (compiled %s)\n"
-        "- Volume: the Extended Practitioner's Edition — Parts IX-XII of the "
-        "two-volume course\n"
         "- Contents: %d chapters in %d parts, plus %d appendices\n"
         "- Volume: approximately %s words of prose and %d lines of code "
         "(estimated %d print pages)\n"

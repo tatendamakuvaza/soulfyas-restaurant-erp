@@ -22,29 +22,28 @@ from html import escape as html_escape
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MANUSCRIPT = os.path.join(ROOT, "manuscript")
-OUTPUT = os.path.join(ROOT, "Big-Data-Analytics-and-Machine-Learning.html")
+OUTPUT = os.path.join(ROOT, "Practical-Data-Analysts-Handbook.html")
 COVER = os.path.join(ROOT, "assets", "cover.jpg")
 
-BOOK_TITLE = "Big Data Analytics and Machine Learning"
-BOOK_SUBTITLE = ("The Complete Practitioner's Course: From SQL, Excel and SPSS "
-                 "to Spark, Deep Learning and Production AI")
+BOOK_TITLE = "The Practical Data Analyst's Handbook"
+BOOK_SHORT = "The Practical Data Analyst's Handbook"
+BOOK_SUBTITLE = ("From Zero to Your First Data Job — A Complete "
+                 "Beginner's Course in Excel, SQL, Statistics, Python "
+                 "and Power BI")
 AUTHOR = "Tatenda Makuvaza"
 AUTHOR_TAG = "The Big Data Analyst"
 YEAR = "2026"
 
 PARTS = [
-    ("Part I",    "Foundations of Big Data Analytics",                 1,  5),
-    ("Part II",   "Data Engineering for Analysts",                    6,  11),
-    ("Part III",  "Mathematics and Statistics for Machine Learning",  12, 16),
-    ("Part IV",   "Visualization and Business Intelligence",          17, 20),
-    ("Part V",    "Machine Learning Foundations",                     21, 29),
-    ("Part VI",   "Advanced Machine Learning",                        30, 36),
-    ("Part VII",  "Big Data Technologies and the Cloud",              37, 41),
-    ("Part VIII", "From Insight to Impact",                           42, 45),
-    ("Part IX",   "The Extended Curriculum: Special Topics and the Craft of Teaching", 46, 50),
-    ("Part X",    "Analytics Across Industries: Domain Playbooks",     51, 60),
-    ("Part XI",   "The Frontier: Advanced Methods and Emerging Practice", 61, 70),
-    ("Part XII",  "The Practitioner's Path: Projects, Clients and the Craft of Delivery", 71, 80),
+    ("Part I",   "Beginning: You, the Data Analyst",              1,  5),
+    ("Part II",  "Excel: Your First Superpower",                  6,  13),
+    ("Part III", "SQL: The Language of Data",                     14, 21),
+    ("Part IV",  "Statistics Without Fear",                       22, 29),
+    ("Part V",   "Python: From Zero to Dangerous",                30, 37),
+    ("Part VI",  "Dashboards and Storytelling with Power BI",     38, 43),
+    ("Part VII", "Real Projects and Your Portfolio",              44, 49),
+    ("Part VIII","Getting the Job",                               50, 56),
+    ("Part IX",  "Beyond the Basics",                             57, 62),
 ]
 
 # ---------------------------------------------------------------------------
@@ -300,8 +299,8 @@ def cover_html():
 <section class="cover" style="%s">
   <div class="scrim"></div>
   <div class="inner">
-    <div class="kicker">THE COMPLETE PRACTITIONER'S COURSE</div>
-    <div class="title">Big Data Analytics<br><span class="amp">&amp;</span> Machine Learning</div>
+    <div class="kicker">A COMPLETE BEGINNER'S COURSE</div>
+    <div class="title">The Practical<br><span class="amp">Data Analyst's Handbook</span></div>
     <div class="subtitle">%s</div>
     <div class="rule"></div>
     <div class="author">%s</div>
@@ -423,7 +422,6 @@ manuscript by build_book.py: one self-contained HTML file with the cover art
 embedded, a linked table of contents, and print-friendly styles.</p>
 <ul>
 <li>Edition: First Edition, %s (compiled %s)</li>
-<li>Volume: the Extended Practitioner&rsquo;s Edition &mdash; Parts IX&ndash;XII of the two-volume course</li>
 <li>Contents: %d chapters in %d parts, plus %d appendices</li>
 <li>Volume: approximately %s words of prose and %d lines of code
 (estimated %d print pages)</li>
