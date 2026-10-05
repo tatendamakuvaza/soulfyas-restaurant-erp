@@ -35,11 +35,11 @@
 - **Part VI:** her numbers become a dashboard her bank manager can read (Power BI).
 - **Part VII:** three portfolio projects, all on Tariro's data, documented for employers.
 - **Part VIII:** the reader's own job hunt, using Tariro as the story.
-- **Parts IX–X:** the gentle maps of what comes next.
+- **Part IX:** the gentle maps of what comes next.
 
 She is fictional; her data is generated (Appendix recipe included) with planted patterns — weekly rhythms, payday spikes, a price-rise dip, a loyal-customer core — so every analysis can be scored against truth.
 
-## The Structure — 10 Parts, 62 Chapters, 5 Appendices
+## The Structure — 9 Parts, 62 Chapters, 5 Appendices
 
 ### Part I — Beginning: You, the Data Analyst (Ch. 1–5)
 1. What a Data Analyst Actually Does — a day in the life; the myths; the job in plain words.

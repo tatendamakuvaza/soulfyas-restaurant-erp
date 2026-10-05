@@ -4,7 +4,7 @@
 
 **The Practical Data Analyst's Handbook — From Zero to Your First Data Job: A Complete Beginner's Course**
 
-**Tatenda Makuvaza — "The Big Data Analyst"**
+**Tatenda Makuvaza — Data Analyst, Author, Educator**
 
 First Edition, 2026
 
@@ -50,7 +50,7 @@ By the last page you will have:
 | VIII — The Job | How do I get hired — and survive the first 90 days? | CV, interviews, freelancing |
 | IX — Beyond | What is machine learning? What comes next? | The gentle maps; the free stack |
 
-Sixty-two chapters and five cookbook appendices (SQL, Excel, and Python recipes, a statistics decision table, and a 100-question interview bank). A steady pace is two to three chapters a week with labs — roughly a sixteen-week course, which is how the author learned it too.
+Sixty-two chapters and seven cookbook appendices (SQL, Excel, and Python recipes, a statistics decision table, a 100-question interview bank, worked lab solutions, and a glossary).
 
 ### A Note on Cost
 
@@ -62,4 +62,4 @@ I completed a six-module data analytics course — SQL, Excel, Python, Power BI,
 
 Work the labs. Be patient with yourself on day one of each new tool — everyone is. And keep Tariro's question in mind whenever the material feels abstract: *someone, somewhere, is making a decision with this number.* That is the whole job, and it is a good one.
 
-*— Tatenda Makuvaza, "The Big Data Analyst", Harare, 2026*
+— Tatenda Makuvaza, Harare, 2026

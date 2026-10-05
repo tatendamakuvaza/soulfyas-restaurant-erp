@@ -45,7 +45,7 @@ BOOK_SUBTITLE = ("From Zero to Your First Data Job — A Complete "
                  "Beginner's Course in Excel, SQL, Statistics, Python "
                  "and Power BI")
 AUTHOR = "Tatenda Makuvaza"
-AUTHOR_TAG = "The Big Data Analyst"
+AUTHOR_TAG = "Data Analyst \u00b7 Author \u00b7 Educator"
 YEAR = "2026"
 
 PAGE_W, PAGE_H = 7 * inch, 10 * inch
@@ -189,7 +189,7 @@ def parse_blocks(md):
 # Inline markdown -> ReportLab markup
 # ---------------------------------------------------------------------------
 
-def inline(text, code_size=7.9):
+def inline(text, code_size=8.4):
     t = xml_escape(text)
     stash = []
 
@@ -226,25 +226,25 @@ def wrap_code_lines(lines, width=88):
 
 def build_styles():
     S = {}
-    S["PartLine"] = ParagraphStyle("PartLine", fontName="Serif-I", fontSize=9.5,
-                                   leading=13, textColor=SLATE, spaceAfter=12)
+    S["PartLine"] = ParagraphStyle("PartLine", fontName="Serif-I", fontSize=10,
+                                   leading=13.8, textColor=SLATE, spaceAfter=12)
     S["ChapterTitle"] = ParagraphStyle("ChapterTitle", fontName="Sans-B", fontSize=17,
                                        leading=21.5, textColor=NAVY, spaceAfter=8,
                                        keepWithNext=1)
     S["PartTitle"] = ParagraphStyle("PartTitle", fontName="Sans-B", fontSize=21,
                                     leading=26, textColor=NAVY, alignment=TA_CENTER)
-    S["H2"] = ParagraphStyle("H2", fontName="Sans-B", fontSize=11.8, leading=15,
+    S["H2"] = ParagraphStyle("H2", fontName="Sans-B", fontSize=12.6, leading=16.2,
                              textColor=NAVY, spaceBefore=13, spaceAfter=5,
                              keepWithNext=1)
-    S["H3"] = ParagraphStyle("H3", fontName="Sans-B", fontSize=10.3, leading=13.2,
+    S["H3"] = ParagraphStyle("H3", fontName="Sans-B", fontSize=10.9, leading=14,
                              textColor=NAVY2, spaceBefore=9, spaceAfter=3.5,
                              keepWithNext=1)
-    S["H4"] = ParagraphStyle("H4", fontName="Sans-B", fontSize=9.4, leading=12,
+    S["H4"] = ParagraphStyle("H4", fontName="Sans-B", fontSize=9.8, leading=12.6,
                              textColor=SLATE, spaceBefore=7, spaceAfter=2.5,
                              keepWithNext=1)
-    S["Body"] = ParagraphStyle("Body", fontName="Serif", fontSize=9.4, leading=13.3,
+    S["Body"] = ParagraphStyle("Body", fontName="Serif", fontSize=10.3, leading=14.9,
                                textColor=INK, alignment=TA_JUSTIFY, spaceAfter=5)
-    S["Quote"] = ParagraphStyle("Quote", fontName="Serif", fontSize=9.1, leading=12.8,
+    S["Quote"] = ParagraphStyle("Quote", fontName="Serif", fontSize=9.8, leading=13.8,
                                 textColor=HexColor("#4a4433"), alignment=TA_LEFT)
     S["Bullet0"] = ParagraphStyle("Bullet0", parent=S["Body"], alignment=TA_LEFT,
                                   leftIndent=14, bulletIndent=3, spaceAfter=2.6,
@@ -252,11 +252,11 @@ def build_styles():
     S["Bullet1"] = ParagraphStyle("Bullet1", parent=S["Body"], alignment=TA_LEFT,
                                   leftIndent=26, bulletIndent=15, spaceAfter=2.6,
                                   bulletFontName="Serif", bulletFontSize=9.4)
-    S["Cell"] = ParagraphStyle("Cell", fontName="Serif", fontSize=7.5, leading=9.8,
+    S["Cell"] = ParagraphStyle("Cell", fontName="Serif", fontSize=8.1, leading=10.7,
                                textColor=INK)
-    S["CellHdr"] = ParagraphStyle("CellHdr", fontName="Sans-B", fontSize=7.3,
-                                  leading=9.4, textColor=white)
-    S["Code"] = ParagraphStyle("Code", fontName="Mono", fontSize=7.4, leading=10,
+    S["CellHdr"] = ParagraphStyle("CellHdr", fontName="Sans-B", fontSize=7.9,
+                                  leading=10.3, textColor=white)
+    S["Code"] = ParagraphStyle("Code", fontName="Mono", fontSize=8.1, leading=11.2,
                                textColor=INK)
     S["Label"] = ParagraphStyle("Label", fontName="Sans-B", fontSize=9,
                                 leading=12, textColor=HexColor("#8a6d1c"),
@@ -274,9 +274,9 @@ STYLES = None
 # ---------------------------------------------------------------------------
 
 def make_table(header, rows):
-    data = [[Paragraph(inline(h, code_size=7.2), STYLES["CellHdr"]) for h in header]]
+    data = [[Paragraph(inline(h, code_size=7.7), STYLES["CellHdr"]) for h in header]]
     for r in rows:
-        data.append([Paragraph(inline(c, code_size=7.2), STYLES["Cell"])
+        data.append([Paragraph(inline(c, code_size=7.7), STYLES["Cell"])
                      for c in (r + [""] * (len(header) - len(r)))[:len(header)]])
     ncols = len(header)
     weights = []
@@ -539,7 +539,7 @@ def main():
 
     doc = BookDoc(OUTPUT, pagesize=(PAGE_W, PAGE_H),
                   title="%s — %s" % (BOOK_TITLE, AUTHOR),
-                  author="%s — %s" % (AUTHOR, AUTHOR_TAG),
+                  author=AUTHOR,
                   subject=BOOK_SUBTITLE,
                   creator="build_pdf.py (ReportLab)")
 

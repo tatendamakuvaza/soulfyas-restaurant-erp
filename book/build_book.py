@@ -31,7 +31,7 @@ BOOK_SUBTITLE = ("From Zero to Your First Data Job — A Complete "
                  "Beginner's Course in Excel, SQL, Statistics, Python "
                  "and Power BI")
 AUTHOR = "Tatenda Makuvaza"
-AUTHOR_TAG = "The Big Data Analyst"
+AUTHOR_TAG = "Data Analyst &middot; Author &middot; Educator"
 YEAR = "2026"
 
 PARTS = [
