@@ -109,7 +109,7 @@ For honours/second-semester students, extend the capstone with one Part X playbo
 
 ## 50.7 Running the Studio: Reviews and Showcases
 
-**Project reviews.** At weeks 4, 8, and 12, students present work-in-progress for ten minutes and receive structured critique: two strengths, two risks, one recommendation. This mirrors real practice (Ch. 72's engagement reviews) and teaches the hardest professional skill — receiving critique without defending.
+**Project reviews.** At weeks 4, 8, and 12, students present work-in-progress for ten minutes and receive structured critique: two strengths, two risks, one recommendation. This mirrors real practice (Ch. 71's project reviews) and teaches the hardest professional skill — receiving critique without defending.
 
 **The showcase.** The final session is public: students present capstones to a real audience — managers from local businesses, other faculty, family. Real audiences raise the stakes productively; students polish slides that would have stayed rough for classmates. Invite a working analyst to give one sentence of feedback per presenter: practitioners' praise is remembered for years.
 

@@ -95,5 +95,5 @@ Surveys are marketing's second dataset: aided/unaided awareness, consideration, 
 ## Further Reading
 
 - *Marketing Analytics* — Wayne Winston (the operations-research view)
-- Chapter 32 (uplift), Chapter 15 (sampling, for the survey layer), Chapter 62 (regression and causality for media mix)
+- Chapter 32 (uplift), Chapter 15 (sampling, for the survey layer), Chapter 61 (causal inference for media mix)
 - Zuva Mobile returns in Chapter 65 (Kumba's language services on Zuva's zero-rated bundle) and Appendix J

@@ -110,4 +110,4 @@ Two quiet killers. **Returns**: the online channel's return rate (Ndineka's is 2
 
 - *The New Science of Retailing* — Fisher and Raman
 - *Why We Buy* — Paco Underhill (the physical analogue of basket analysis)
-- Chapter 32 (uplift), Chapter 61 (causal discipline for experiments), Chapter 62 (pricing under uncertainty)
+- Chapter 32 (uplift), Chapter 61 (causal discipline for pricing experiments)

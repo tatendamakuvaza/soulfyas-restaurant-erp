@@ -120,7 +120,7 @@ Read what the fifteen lines include: input *validation* (impossible values rejec
 
 1. **Version everything together** — code (git), model artefact (registry), API route (`/v1/`), and the version echoed in responses. "Which model produced this score?" must be answerable from the score itself.
 2. **Log like you will be debugged** — every request (timestamp, features, score, latency, caller), because your monitoring data *is* your log, and Chapter 43's drift detection will read exactly this table.
-3. **Document the contract** — the API's generated docs plus one human page: what the score means, its calibration, its known weaknesses (Chapter 22's model card, linked from the product).
+3. **Document the contract** — the API's generated docs plus one human page: what the score means, its calibration, its known weaknesses (Chapter 29's model card, linked from the product).
 4. **Degrade gracefully** — a model failure should not take down the caller: fall back to a default score, a cached result, or an explicit "unavailable" that the caller is designed to handle. Products fail; *systems* degrade.
 
 ## 49.5 Deployment, Minimally
