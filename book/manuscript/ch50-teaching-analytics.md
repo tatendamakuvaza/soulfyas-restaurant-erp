@@ -93,7 +93,7 @@ Grade what analysts produce, not what exams can measure. A scheme that has survi
 | Capstone | 40% | End-to-end analysis + presentation | Outcome rubric below |
 | Participation | 10% | Labs, reviews, showcase | Presence and contribution |
 
-Exam questions live in Appendix H — use them for the viva component, where students defend their capstone choices aloud. Oral defence is the only assessment that reliably catches borrowed work and missing understanding simultaneously.
+Draw viva questions from each part's Practice Labs and Key Takeaways, and use them where students defend their capstone choices aloud. Oral defence is the only assessment that reliably catches borrowed work and missing understanding simultaneously.
 
 The capstone rubric, shared with students on day one:
 
@@ -168,4 +168,4 @@ If you have taught through this book, you have given eighty chapters of grammar,
 
 - *Understanding by Design* — Wiggins and McTighe (backwards design)
 - *Teaching Naked* — José Antonio Bowen (technology outside the classroom)
-- Appendix H (assessment bank), Appendix I (slide kits), Appendix J (case portfolio)
+- Appendix I (slide kits), Appendix J (case portfolio)

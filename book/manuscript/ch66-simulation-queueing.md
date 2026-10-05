@@ -98,4 +98,4 @@ The chapter's deliverable, the one that earns the fee: current λ and μ by hour
 
 - *Queueing Methods for Services and Manufacturing* — Hall (the practitioner's reference)
 - Little's original paper (1961) — one page, permanent value
-- Chapter 67 (simulation that tests these moves), Chapter 54 and 57 (the clinic and the licensing office), Appendix G for the worked Wq numbers
+- Chapter 67 (simulation that tests these moves), Chapter 54 and 57 (the clinic and the licensing office)

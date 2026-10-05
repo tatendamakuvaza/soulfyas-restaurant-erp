@@ -78,7 +78,7 @@ The part's running study: Azu wants a fourth outlet, and the analytics earn thei
 
 1. Build the demand surface for Soulfya's delivery orders; map it per 1,000 households, and mark where the raw-count map and the normalised map disagree most.
 2. Compute nearest-competitor and drive-time-to-outlet features for every member; add them to the churn model from Part V and report whether they earn their place.
-3. Compute Moran's I for delivery frequency by suburb; run the permutation test and write the two-sentence interpretation a manager can repeat. (The worked numbers — with the sum of cross-products 502.5 — are in Appendix G.)
+3. Compute Moran's I for delivery frequency by suburb; run the permutation test and write the two-sentence interpretation a manager can repeat. (The worked arithmetic, for the check: the sum of cross-products is 502.5.)
 4. The siting study: build the gravity model, score three candidate sites on incremental revenue net of cannibalisation, and write the shortlist memo with intervals.
 5. The MAUP audit: aggregate the same orders by suburb, ward, and 1-km grid; find one finding that changes sign across aggregations and explain what the decision-maker should be told.
 6. The missing-base-map check: identify suburbs with zero orders, and determine — from coverage polygons and population — whether they are low demand or no coverage.

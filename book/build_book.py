@@ -413,6 +413,7 @@ def main():
             body.append(html)
             body.append('<div style="page-break-after:always;"></div>')
 
+    parts_present = len(toc_parts)
     today = datetime.date.today().strftime("%d %B %Y")
     colophon = """
 <footer class="colophon">
@@ -422,6 +423,7 @@ manuscript by build_book.py: one self-contained HTML file with the cover art
 embedded, a linked table of contents, and print-friendly styles.</p>
 <ul>
 <li>Edition: First Edition, %s (compiled %s)</li>
+<li>Volume: the Extended Practitioner&rsquo;s Edition &mdash; Parts IX&ndash;XII of the two-volume course</li>
 <li>Contents: %d chapters in %d parts, plus %d appendices</li>
 <li>Volume: approximately %s words of prose and %d lines of code
 (estimated %d print pages)</li>
@@ -431,7 +433,7 @@ embedded, a linked table of contents, and print-friendly styles.</p>
 The data is already pouring in somewhere near you.</p>
 </footer>
 """ % (html_escape(BOOK_TITLE), html_escape(BOOK_SUBTITLE), YEAR, today,
-       chapters, len(PARTS), apps, "{:,}".format(words), code_lines, est_pages)
+       chapters, parts_present, apps, "{:,}".format(words), code_lines, est_pages)
 
     html = """<!DOCTYPE html>
 <html lang="en">

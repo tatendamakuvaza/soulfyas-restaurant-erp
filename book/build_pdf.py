@@ -630,6 +630,8 @@ def main():
             story.append(PageBreak())
             story.extend(render_doc(md))
 
+    parts_present = sum(1 for _, _, start, end in PARTS
+                        if any(n in by_num for n in range(start, end + 1)))
     today = datetime.date.today().strftime("%d %B %Y")
     colophon_md = (
         "# About this Edition\n\n"
@@ -638,6 +640,8 @@ def main():
         "build_pdf.py (ReportLab): 7 x 10 inch textbook trim, running headers, "
         "a linked table of contents, and PDF outline bookmarks.\n\n"
         "- Edition: First Edition, %s (compiled %s)\n"
+        "- Volume: the Extended Practitioner's Edition — Parts IX-XII of the "
+        "two-volume course\n"
         "- Contents: %d chapters in %d parts, plus %d appendices\n"
         "- Volume: approximately %s words of prose and %d lines of code "
         "(estimated %d print pages)\n"
@@ -649,7 +653,7 @@ def main():
         "The companion HTML edition is screen-optimised and regenerates in seconds.\n\n"
         "Thank you for reading this book — and for teaching from it. "
         "The data is already pouring in somewhere near you.\n"
-        % (BOOK_TITLE, BOOK_SUBTITLE, YEAR, today, chapters, len(PARTS), apps,
+        % (BOOK_TITLE, BOOK_SUBTITLE, YEAR, today, chapters, parts_present, apps,
            "{:,}".format(words), code_lines, est_pages)
     )
     story.append(NextPageTemplate("Content"))
