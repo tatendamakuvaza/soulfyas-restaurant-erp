@@ -63,7 +63,7 @@ Tariro's Sunday-promotion question (Chapter 25's memo promised this) needs data 
 
 ## 27.5 The Survey, in SPSS
 
-The chapter's deliverable: Tariro's survey, run for real (n = 112 in-shop respondents over two Saturdays), analysed in **SPSS** — the classic statistics package you will meet in research, government, health, and market-research work (installation: the free trial or your institution's licence; Appendix C's Stata notes carry the equivalents). SPSS's philosophy is the *opposite* of SQL's: no code visible, menus all the way — and behind every menu is a chapter you have already lived. The run-through:
+The chapter's deliverable: Tariro's survey, run for real (n = 112 in-shop respondents over two Saturdays), analysed in **SPSS** — the classic statistics package you will meet in research, government, health, and market-research work (installation: the free trial or your institution's licence; Appendix D's tool tables carry the equivalents). SPSS's philosophy is the *opposite* of SQL's: no code visible, menus all the way — and behind every menu is a chapter you have already lived. The run-through:
 
 1. **Enter the data** — Variable View: name each column (`sunday_intent`, `tier`, `usual_spend`), set Type (numeric/string) and, crucially, **Value Labels** (1 = "Definitely would", 2 = "Probably would"… 5 = "Definitely would not") — SPSS's equivalent of a data dictionary, and where categorical hygiene happens. Data View: one row per respondent.
 2. **Frequencies** — Analyze → Descriptive Statistics → Frequencies: counts and percentages per question. The first honest look: 18% "Definitely would", 26% "Probably would", 22% unsure…

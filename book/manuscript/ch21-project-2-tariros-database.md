@@ -48,7 +48,7 @@ CREATE TABLE sales (
 );
 ```
 
-Then **File → Import** the four CSVs into their tables (Appendix E has the generated files). Now the loading checks — the reconciliation liturgy, performed at every load, forever:
+Then **File → Import** the four CSVs into their tables (the files ship with the book's repository; the generator recipe is Appendix C's final section). Now the loading checks — the reconciliation liturgy, performed at every load, forever:
 
 1. **Row counts**: four counts (one per table) written into your log, compared against the CSV line counts. No surprises, or explained surprises.
 2. **The key census**: `SELECT customer_id, COUNT(*) FROM customers GROUP BY customer_id HAVING COUNT(*) > 1` — duplicates in a primary-key column must be zero (the engine enforces it; let it refuse, and fix the CSV — never weaken the key).

@@ -85,7 +85,7 @@ if n_orphan > 20:                       # config: the documented tolerance
 
 ## 37.4 The Pipeline
 
-The heart of `build_report.py`, abridged to its moves (the full listing is in Appendix B; every line is a chapter you own):
+The heart of `build_report.py`, abridged to its moves (the full listing is in Appendix C; every line is a chapter you own):
 
 ```python
 """Tariro's monthly report -- builds itself. Run: python build_report.py"""
@@ -148,7 +148,7 @@ And so the promise of Part V closes: the analysis that took a spreadsheet aftern
 
 ## Practice Lab
 
-1. Build the full structure and get `build_report.py` running end-to-end on your data: raw CSVs, checks, three findings, two exhibits, the dated output folder, the run log. (Appendix B's listing is your scaffold; type it, don't paste it.)
+1. Build the full structure and get `build_report.py` running end-to-end on your data: raw CSVs, checks, three findings, two exhibits, the dated output folder, the run log. (Appendix C's listing is your scaffold; type it, don't paste it.)
 2. The failure drill, twice: (a) corrupt a copy of `sales.csv` (delete an amount, duplicate a customer_id) and watch the guard abort; (b) add a new month's plausible rows and watch the report roll forward unchanged in effort. Log both runs' messages — the pair is the automation's character reference.
 3. The human review: read the machine's report and mark every place the numbers are right but the *telling* needs you (missing caveats? a finding the template doesn't know to look for?); extend the template by one finding — your judgment, encoded.
 4. The scheduling, done for real: schedule the script (or simulate it: run it twice a day for three days) and collect the run logs; write the one-paragraph runbook ("if it fails, do this") in the README — the handover document you would leave a successor.
@@ -157,4 +157,4 @@ And so the promise of Part V closes: the analysis that took a spreadsheet aftern
 ## Further Reading
 
 - Chapters 38–43 (Power BI — the report becomes a dashboard), Chapter 49 (the portfolio)
-- Appendix B (the full pipeline listing + the Python cookbook)
+- Appendix C (the full pipeline listing + the Python cookbook)

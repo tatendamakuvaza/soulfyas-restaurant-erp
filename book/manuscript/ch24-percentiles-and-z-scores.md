@@ -18,7 +18,7 @@ The **p-th percentile** is the value below which p% of the data lies. The median
 
 Percentiles are the great democratic statistic: they compare a value to *its peers* without assuming any shape. "A 5,200-dollar Saturday is the 91st percentile of Saturdays" is true whether Saturdays are bell-shaped, skewed, or bumpy — no bell required. That shape-freedom is why percentiles dominate reporting where tails matter: exam scores ("90th percentile"), website latency ("p95 response time"), and income ("the 99th percentile") are all peers-relative-to-peers claims.
 
-One footnote you need once and then forever: **there are several defensible ways to compute a percentile from finite data** (linear interpolation between ranks, nearest-rank, and variants) and tools differ — Excel's `PERCENTILE.INC` vs `PERCENTILE.EXC`, different defaults in SQL engines and pandas. On large data the differences vanish; on a 20-value column they can move a quartile noticeably. The professional rule: know your tool's default, state it when precision matters, and never compare percentiles computed by different methods without checking. (Appendix C's cheat sheet lists the defaults.)
+One footnote you need once and then forever: **there are several defensible ways to compute a percentile from finite data** (linear interpolation between ranks, nearest-rank, and variants) and tools differ — Excel's `PERCENTILE.INC` vs `PERCENTILE.EXC`, different defaults in SQL engines and pandas. On large data the differences vanish; on a 20-value column they can move a quartile noticeably. The professional rule: know your tool's default, state it when precision matters, and never compare percentiles computed by different methods without checking. (Appendix D's cheat sheet lists the defaults.)
 
 ## 24.2 The Z-Score
 
@@ -76,4 +76,4 @@ And with the ruler in hand, the Part III ledger's biggest question — *is Sunda
 ## Further Reading
 
 - Chapter 25 (sampling — where the population's μ and σ enter the story), Chapter 26 (the t-test — your Sunday z grows up)
-- Appendix C (the statistics cheat sheet: every rule in this Part, one page)
+- Appendix D (the statistics cheat sheet: every rule in this Part, one page)

@@ -87,7 +87,7 @@ Seven chapters, each a working session on Tariro's data, each ending in the Prac
 
 The method that makes it stick, the same method this book has used since Part I: *every concept arrives attached to Tariro's questions; every lab re-uses the artefacts you already built.* You are not learning Python and then applying it — you are re-doing work you understand, in a tool that makes it permanent. That is also the least frightening way to learn a language: the analysis is already in your head; only the accent is new.
 
-> **From Your Toolkit — the permanent bench:** the notebook becomes your default workspace for the rest of the book: Part VI feeds Power BI from Python-cleaned data; Chapter 58's machine learning lives here; the portfolio (Part VII) is notebook-driven; even this book's datasets (Appendix E) come with a starter notebook. The five cells of this chapter are the bench's five drawers — load, inspect, summarise, question, chart — and every chapter ahead opens them in different orders.
+> **From Your Toolkit — the permanent bench:** the notebook becomes your default workspace for the rest of the book: Part VI feeds Power BI from Python-cleaned data; Chapter 58's machine learning lives here; the portfolio (Part VII) is notebook-driven; even this book's datasets (Appendix C includes the generator recipe) come with a starter notebook. The five cells of this chapter are the bench's five drawers — load, inspect, summarise, question, chart — and every chapter ahead opens them in different orders.
 
 ## Key Takeaways
 

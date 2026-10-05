@@ -30,7 +30,7 @@ Everything SPSS does happens in four windows, and this book's habits map onto th
 
 1. **Variable View** (the data dictionary, made visible): every column has Type, Label, **Values** (the value labels — 1 = "Gold", 2 = "Silver" — categorical hygiene lives here), Missing (declared missing codes — the Chapter 15 NULL discipline, GUI edition), and Measure (Nominal/Ordinal/Scale — you declaring what each column *is*, which SPSS uses to offer sensible menus). Fifteen careful minutes here saves every hour after; skipping it is how "averaged the suburb codes" is born.
 2. **Data View**: the grid — one row per unit (respondent, sale, patient). SPSS will happily let you type in it; the professional reads it, cleans elsewhere, and documents.
-3. **The dialogs** (Analyze menu): Descriptives and Frequencies (Ch. 22), Explore with plots (Ch. 23's histograms and the five-number summary), Crosstabs with chi-square (Ch. 27), Compare Means → T tests (Ch. 26), Correlate and Regression (Ch. 28). Each dialog is a chapter you have already lived; the buttons are in Appendix C's walkthrough.
+3. **The dialogs** (Analyze menu): Descriptives and Frequencies (Ch. 22), Explore with plots (Ch. 23's histograms and the five-number summary), Crosstabs with chi-square (Ch. 27), Compare Means → T tests (Ch. 26), Correlate and Regression (Ch. 28). Each dialog is a chapter you have already lived; the buttons are in Appendix D's walkthrough.
 4. **The Output Viewer**: results as formatted tables with significance stars and footnotes — the tables you now *read fluently* because this Part taught the six lines every test prints (statistic, df, p, effect, interval, n).
 
 And the feature that elevates SPSS from calculator to profession: **Syntax**. Every menu run can Paste (instead of OK) its commands to a syntax window, saved as a `.sps` file, and re-run — SPSS's version of the query pack from Chapter 21. The working habit, identical to SQL etiquette: *menus to explore, syntax to deliver.* Your Chapter 27 cross-tab, pasted as syntax, is two lines that reproduce the finding on next month's data:
@@ -60,7 +60,7 @@ regress bottles price
 
 Read the shape of it: `*` comments (the why, as always), one command per line, each command an English verb with options after the comma. `summarize, detail` is Chapter 22's five-number summary; `ttest, by()` is the Sunday courtroom; `regress` is the line of best fit. Results print to a log; the do-file plus the log *is* the analysis — an auditor (or your successor) re-runs the do-file and watches your numbers re-emerge. That is Stata's beloved property, and it is the destination this book has been steering you toward since Chapter 8's log: **analysis as a document, not a performance.**
 
-The beginner's Stata kit (Appendix C expands): `import delimited`, `describe`, `summarize`, `generate` (new variables), `keep`/`drop` (rows and columns), `tabulate` (cross-tabs, with `chi2`), `ttest`, `regress`, `save`. Every one maps to a chapter behind you — the translation table below is the proof.
+The beginner's Stata kit (Appendix D expands): `import delimited`, `describe`, `summarize`, `generate` (new variables), `keep`/`drop` (rows and columns), `tabulate` (cross-tabs, with `chi2`), `ttest`, `regress`, `save`. Every one maps to a chapter behind you — the translation table below is the proof.
 
 ## 29.4 The Translation Table
 

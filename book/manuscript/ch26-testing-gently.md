@@ -31,7 +31,7 @@ The decision rule, mechanical and safe: **p < α → reject H₀; p ≥ α → f
 
 ## 26.3 The Sunday Test, Closed
 
-Two independent groups (Sunday days vs weekday days), comparing means: the **two-sample t-test** — the z-machinery of Chapter 24 wearing a small-sample correction (Student's t: slightly wider than the normal for small n, converging to it as n grows — every tool has it built in; Appendix C states the formula). The arithmetic skeleton, computed honestly:
+Two independent groups (Sunday days vs weekday days), comparing means: the **two-sample t-test** — the z-machinery of Chapter 24 wearing a small-sample correction (Student's t: slightly wider than the normal for small n, converging to it as n grows — every tool has it built in; Appendix D states the formula). The arithmetic skeleton, computed honestly:
 
 ```text
 Sunday days:  n₁ = 78,  mean₁ = 2,150, s₁ = 590
@@ -43,7 +43,7 @@ t = 840 / 45.7 ≈ 18.4
 
 A t of 18.4 against roughly 200 degrees of freedom: p < 0.0001 — far past any α you would ever set. **Verdict: reject H₀. Sunday's shortfall is real** — in the nothing-happened world, a gap this consistent across 78 Sundays essentially never occurs. The ledger's first formal closure, and notice what the test added to the Chapter 24 informal z: a *probability attached to the surprise*, which is what "significance" means — nothing mystical, just surprise, measured.
 
-In a tool, the same test is three clicks (Analysis ToolPak → t-Test: Two-Sample; SPSS → Analyze → Compare Means → Independent-Samples T Test; Python/Excel functions in Appendix C) — but you can now *read the output*, which is the skill: the t, the df, the p, and the group means it was all computed from.
+In a tool, the same test is three clicks (Analysis ToolPak → t-Test: Two-Sample; SPSS → Analyze → Compare Means → Independent-Samples T Test; Python/Excel functions in Appendix D) — but you can now *read the output*, which is the skill: the t, the df, the p, and the group means it was all computed from.
 
 ## 26.4 Pairing: Before and After
 

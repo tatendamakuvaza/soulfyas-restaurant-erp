@@ -33,7 +33,7 @@ intercept 6.2: at price zero — extrapolation, not knowledge (no data there)
 
 The **slope is the finding** — "a dollar costs a bottle a month" is a sentence a shop owner acts on (it prices the wholesaler's increase: at +0.80, expect ≈ −0.9 bottles/month per customer). The **intercept** anchors the line but means nothing outside the data's range. **R²** (r squared, here ≈ 0.76) is "the share of the y-variance the line explains" — 76% of month-to-month bottle swings track price; the other 24% is everything else (paydays, rivals, weather) — the residual world where the next question lives.
 
-**Prediction, with honesty attached**: at price 3.60 the line says 2.24 bottles. That is a *point* prediction; the honest version carries an interval wide enough to matter (prediction intervals widen with distance from the data's centre and with the residual scatter — every tool prints them; Appendix C has the formulas). Lines are for interpolating within the data's range; extrapolation — price 9.00, predicted −3.7 bottles (impossible, and the line does not care) — is where straight lines lie confidently. Extrapolate at your reputation's risk.
+**Prediction, with honesty attached**: at price 3.60 the line says 2.24 bottles. That is a *point* prediction; the honest version carries an interval wide enough to matter (prediction intervals widen with distance from the data's centre and with the residual scatter — every tool prints them; Appendix D has the formulas). Lines are for interpolating within the data's range; extrapolation — price 9.00, predicted −3.7 bottles (impossible, and the line does not care) — is where straight lines lie confidently. Extrapolate at your reputation's risk.
 
 ## 28.3 The Trap, Formally
 
