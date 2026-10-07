@@ -1,0 +1,51 @@
+Customer_ID,Customer_Name,Region,Country,Industry,Credit_Limit,Customer_Since,Payment_Terms,Risk_Category
+CUST-2001,Acme Industrial Technologies,North America,USA,Manufacturing,500000,2019-03-15,Net 30,Preferred
+CUST-2002,Globex Global Logistics,North America,USA,Logistics,750000,2019-06-20,Net 30,Preferred
+CUST-2003,Initech Software Corporation,North America,USA,Technology,400000,2020-01-10,Net 30,Standard
+CUST-2004,Umbrella Health Systems,Europe,UK,Healthcare,1000000,2020-04-18,Net 60,Preferred
+CUST-2005,Stark Energy & Robotics,North America,USA,Energy,1500000,2020-08-22,Net 30,Preferred
+CUST-2006,Wayne Financial Holdings,North America,USA,Financial Services,2000000,2020-11-05,Net 30,Preferred
+CUST-2007,Cyberdyne Automated Systems,Asia Pacific,Japan,Technology,600000,2021-02-14,Net 60,Standard
+CUST-2008,Massive Dynamic Biotech,Europe,Germany,Healthcare,850000,2021-05-30,Net 45,Preferred
+CUST-2009,Soylent Consumer Products,North America,USA,Retail,300000,2021-09-12,Net 30,High Risk
+CUST-2010,Hooli Cloud Computing,North America,USA,Technology,1200000,2021-12-01,Net 30,Preferred
+CUST-2011,Velocity Partners,North America,Canada,Technology,1000000,2021-12-06,Net 45,High Risk
+CUST-2012,Apex Corp,North America,Canada,Healthcare,150000,2023-02-21,Net 30,Preferred
+CUST-2013,Velocity Industries,Europe,France,Retail,750000,2023-04-15,Net 30,Preferred
+CUST-2014,Pinnacle Solutions,North America,Canada,Manufacturing,750000,2022-09-09,Net 30,Standard
+CUST-2015,Velocity Industries,Latin America,Brazil,Telecommunications,250000,2023-09-16,Net 45,Standard
+CUST-2016,Nexus Corp,Latin America,Brazil,Manufacturing,250000,2021-10-13,Net 30,Preferred
+CUST-2017,Apex Dynamics,Latin America,Brazil,Energy,750000,2023-11-26,Net 30,Preferred
+CUST-2018,Apex Solutions,Asia Pacific,Japan,Telecommunications,150000,2023-02-17,Net 60,Standard
+CUST-2019,Velocity Solutions,Asia Pacific,Australia,Telecommunications,250000,2020-08-26,Net 45,Standard
+CUST-2020,Echo Corp,North America,Canada,Telecommunications,500000,2023-06-21,Net 60,High Risk
+CUST-2021,Apex Group,Europe,Germany,Energy,500000,2021-12-03,Net 60,Standard
+CUST-2022,Horizon Group,Latin America,Brazil,Healthcare,500000,2020-01-11,Net 30,Standard
+CUST-2023,Sterling Dynamics,Asia Pacific,Australia,Healthcare,250000,2023-10-22,Net 30,Standard
+CUST-2024,Vanguard Group,Asia Pacific,Australia,Financial Services,250000,2023-10-05,Net 30,Preferred
+CUST-2025,Horizon Industries,Latin America,Brazil,Manufacturing,150000,2023-05-22,Net 30,Standard
+CUST-2026,Aura Dynamics,Europe,France,Energy,750000,2022-08-28,Net 45,Standard
+CUST-2027,Quantum Partners,North America,Canada,Healthcare,750000,2022-10-10,Net 45,Standard
+CUST-2028,Horizon Corp,Europe,France,Technology,1000000,2020-10-24,Net 60,Standard
+CUST-2029,Pinnacle Dynamics,Europe,Germany,Energy,250000,2022-11-25,Net 30,Standard
+CUST-2030,Horizon Enterprises,Europe,France,Telecommunications,750000,2020-10-12,Net 30,Standard
+CUST-2031,Summit Dynamics,Asia Pacific,Australia,Healthcare,250000,2021-09-12,Net 45,Standard
+CUST-2032,Summit Partners,Europe,France,Energy,500000,2020-08-03,Net 30,Standard
+CUST-2033,Horizon Corp,Asia Pacific,Japan,Technology,750000,2020-05-18,Net 30,Preferred
+CUST-2034,Sterling Industries,Asia Pacific,Australia,Telecommunications,500000,2020-11-08,Net 60,Standard
+CUST-2035,Echo Dynamics,Europe,Germany,Energy,150000,2023-12-10,Net 60,Standard
+CUST-2036,Vanguard Enterprises,North America,USA,Manufacturing,750000,2020-02-08,Net 30,Preferred
+CUST-2037,Aura Dynamics,Asia Pacific,Australia,Financial Services,250000,2023-11-04,Net 60,High Risk
+CUST-2038,Quantum Industries,North America,USA,Energy,500000,2021-08-15,Net 30,Standard
+CUST-2039,Nova Dynamics,Asia Pacific,Japan,Technology,750000,2022-04-04,Net 60,Standard
+CUST-2040,Horizon Holdings,North America,USA,Technology,500000,2021-03-26,Net 30,Standard
+CUST-2041,Nexus Holdings,Europe,Germany,Telecommunications,250000,2022-03-26,Net 30,Standard
+CUST-2042,Vanguard Solutions,Europe,France,Telecommunications,250000,2020-11-28,Net 30,Standard
+CUST-2043,Apex Dynamics,Europe,Germany,Financial Services,500000,2020-03-09,Net 30,Standard
+CUST-2044,Velocity Corp,North America,Canada,Energy,150000,2023-08-25,Net 45,High Risk
+CUST-2045,Echo Group,Latin America,Brazil,Financial Services,250000,2020-12-26,Net 45,Preferred
+CUST-2046,Horizon Enterprises,North America,USA,Retail,750000,2023-11-04,Net 60,Preferred
+CUST-2047,Nova Group,Asia Pacific,Japan,Financial Services,250000,2020-03-09,Net 45,Preferred
+CUST-2048,Echo Industries,Latin America,Brazil,Financial Services,1000000,2023-02-26,Net 30,High Risk
+CUST-2049,Velocity Holdings,Asia Pacific,Australia,Retail,250000,2023-06-27,Net 60,Preferred
+CUST-2050,Quantum Group,Asia Pacific,Japan,Retail,500000,2022-06-05,Net 60,Standard

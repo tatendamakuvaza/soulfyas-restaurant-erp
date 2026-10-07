@@ -1,0 +1,73 @@
+Bank_Trans_ID,Statement_Date,Transaction_Type,Reference_Number,Amount,GL_Reference_Account,Is_Reconciled,Reconciliation_Notes
+BNK-50001,2024-01-28,ACH Customer Receipts Deposit,DEP-202401,106591.15,1010,1,Matched with AR batch settlements.
+BNK-50002,2024-01-28,ACH Vendor Wire Outflows,WIR-202401,-55169.36,1010,1,Matched with AP disbursements.
+BNK-50003,2024-01-28,Bank Service Fee,FEE-202401,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50004,2024-02-28,ACH Customer Receipts Deposit,DEP-202402,957726.15,1010,1,Matched with AR batch settlements.
+BNK-50005,2024-02-28,ACH Vendor Wire Outflows,WIR-202402,-228219.5,1010,1,Matched with AP disbursements.
+BNK-50006,2024-02-28,Bank Service Fee,FEE-202402,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50007,2024-03-28,ACH Customer Receipts Deposit,DEP-202403,1316152.59,1010,1,Matched with AR batch settlements.
+BNK-50008,2024-03-28,ACH Vendor Wire Outflows,WIR-202403,-411782.37,1010,1,Matched with AP disbursements.
+BNK-50009,2024-03-28,Bank Service Fee,FEE-202403,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50010,2024-04-28,ACH Customer Receipts Deposit,DEP-202404,1302185.15,1010,1,Matched with AR batch settlements.
+BNK-50011,2024-04-28,ACH Vendor Wire Outflows,WIR-202404,-222793.06,1010,1,Matched with AP disbursements.
+BNK-50012,2024-04-28,Bank Service Fee,FEE-202404,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50013,2024-05-28,ACH Customer Receipts Deposit,DEP-202405,1154997.46,1010,1,Matched with AR batch settlements.
+BNK-50014,2024-05-28,ACH Vendor Wire Outflows,WIR-202405,-450704.89,1010,1,Matched with AP disbursements.
+BNK-50015,2024-05-28,Bank Service Fee,FEE-202405,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50016,2024-06-28,ACH Customer Receipts Deposit,DEP-202406,1500548.96,1010,1,Matched with AR batch settlements.
+BNK-50017,2024-06-28,ACH Vendor Wire Outflows,WIR-202406,-319158.98,1010,1,Matched with AP disbursements.
+BNK-50018,2024-06-28,Bank Service Fee,FEE-202406,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50019,2024-07-28,ACH Customer Receipts Deposit,DEP-202407,1058999.88,1010,1,Matched with AR batch settlements.
+BNK-50020,2024-07-28,ACH Vendor Wire Outflows,WIR-202407,-324546.28,1010,1,Matched with AP disbursements.
+BNK-50021,2024-07-28,Bank Service Fee,FEE-202407,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50022,2024-08-28,ACH Customer Receipts Deposit,DEP-202408,1348560.86,1010,1,Matched with AR batch settlements.
+BNK-50023,2024-08-28,ACH Vendor Wire Outflows,WIR-202408,-472206.42,1010,1,Matched with AP disbursements.
+BNK-50024,2024-08-28,Bank Service Fee,FEE-202408,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50025,2024-09-28,ACH Customer Receipts Deposit,DEP-202409,1278839.92,1010,1,Matched with AR batch settlements.
+BNK-50026,2024-09-28,ACH Vendor Wire Outflows,WIR-202409,-498111.91,1010,1,Matched with AP disbursements.
+BNK-50027,2024-09-28,Bank Service Fee,FEE-202409,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50028,2024-10-28,ACH Customer Receipts Deposit,DEP-202410,1532894.04,1010,1,Matched with AR batch settlements.
+BNK-50029,2024-10-28,ACH Vendor Wire Outflows,WIR-202410,-272716.38,1010,1,Matched with AP disbursements.
+BNK-50030,2024-10-28,Bank Service Fee,FEE-202410,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50031,2024-11-28,ACH Customer Receipts Deposit,DEP-202411,1430012.5,1010,1,Matched with AR batch settlements.
+BNK-50032,2024-11-28,ACH Vendor Wire Outflows,WIR-202411,-374400.13,1010,1,Matched with AP disbursements.
+BNK-50033,2024-11-28,Bank Service Fee,FEE-202411,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50034,2024-12-28,ACH Customer Receipts Deposit,DEP-202412,1507484.65,1010,1,Matched with AR batch settlements.
+BNK-50035,2024-12-28,ACH Vendor Wire Outflows,WIR-202412,-277830.18,1010,1,Matched with AP disbursements.
+BNK-50036,2024-12-28,Bank Service Fee,FEE-202412,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50037,2025-01-28,ACH Customer Receipts Deposit,DEP-202501,1363981.39,1010,1,Matched with AR batch settlements.
+BNK-50038,2025-01-28,ACH Vendor Wire Outflows,WIR-202501,-359925.62,1010,1,Matched with AP disbursements.
+BNK-50039,2025-01-28,Bank Service Fee,FEE-202501,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50040,2025-02-28,ACH Customer Receipts Deposit,DEP-202502,1234432.38,1010,1,Matched with AR batch settlements.
+BNK-50041,2025-02-28,ACH Vendor Wire Outflows,WIR-202502,-320422.1,1010,1,Matched with AP disbursements.
+BNK-50042,2025-02-28,Bank Service Fee,FEE-202502,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50043,2025-03-28,ACH Customer Receipts Deposit,DEP-202503,1462380.41,1010,1,Matched with AR batch settlements.
+BNK-50044,2025-03-28,ACH Vendor Wire Outflows,WIR-202503,-287843.79,1010,1,Matched with AP disbursements.
+BNK-50045,2025-03-28,Bank Service Fee,FEE-202503,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50046,2025-04-28,ACH Customer Receipts Deposit,DEP-202504,1198750.9,1010,1,Matched with AR batch settlements.
+BNK-50047,2025-04-28,ACH Vendor Wire Outflows,WIR-202504,-368905.03,1010,1,Matched with AP disbursements.
+BNK-50048,2025-04-28,Bank Service Fee,FEE-202504,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50049,2025-05-28,ACH Customer Receipts Deposit,DEP-202505,1429393.44,1010,1,Matched with AR batch settlements.
+BNK-50050,2025-05-28,ACH Vendor Wire Outflows,WIR-202505,-383075.89,1010,1,Matched with AP disbursements.
+BNK-50051,2025-05-28,Bank Service Fee,FEE-202505,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50052,2025-06-28,ACH Customer Receipts Deposit,DEP-202506,1233309.55,1010,1,Matched with AR batch settlements.
+BNK-50053,2025-06-28,ACH Vendor Wire Outflows,WIR-202506,-410298.38,1010,1,Matched with AP disbursements.
+BNK-50054,2025-06-28,Bank Service Fee,FEE-202506,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50055,2025-07-28,ACH Customer Receipts Deposit,DEP-202507,1495569.16,1010,1,Matched with AR batch settlements.
+BNK-50056,2025-07-28,ACH Vendor Wire Outflows,WIR-202507,-353515.61,1010,1,Matched with AP disbursements.
+BNK-50057,2025-07-28,Bank Service Fee,FEE-202507,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50058,2025-08-28,ACH Customer Receipts Deposit,DEP-202508,1329281.05,1010,1,Matched with AR batch settlements.
+BNK-50059,2025-08-28,ACH Vendor Wire Outflows,WIR-202508,-327144.92,1010,1,Matched with AP disbursements.
+BNK-50060,2025-08-28,Bank Service Fee,FEE-202508,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50061,2025-09-28,ACH Customer Receipts Deposit,DEP-202509,1289404.26,1010,1,Matched with AR batch settlements.
+BNK-50062,2025-09-28,ACH Vendor Wire Outflows,WIR-202509,-408725.04,1010,1,Matched with AP disbursements.
+BNK-50063,2025-09-28,Bank Service Fee,FEE-202509,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50064,2025-10-28,ACH Customer Receipts Deposit,DEP-202510,1004986.23,1010,1,Matched with AR batch settlements.
+BNK-50065,2025-10-28,ACH Vendor Wire Outflows,WIR-202510,-344406.38,1010,1,Matched with AP disbursements.
+BNK-50066,2025-10-28,Bank Service Fee,FEE-202510,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50067,2025-11-28,ACH Customer Receipts Deposit,DEP-202511,1343717.23,1010,1,Matched with AR batch settlements.
+BNK-50068,2025-11-28,ACH Vendor Wire Outflows,WIR-202511,-329084.52,1010,1,Matched with AP disbursements.
+BNK-50069,2025-11-28,Bank Service Fee,FEE-202511,-450.0,9100,1,Standard monthly treasury maintenance fee.
+BNK-50070,2025-12-28,ACH Customer Receipts Deposit,DEP-202512,1434059.65,1010,1,Matched with AR batch settlements.
+BNK-50071,2025-12-28,ACH Vendor Wire Outflows,WIR-202512,-309748.04,1010,1,Matched with AP disbursements.
+BNK-50072,2025-12-28,Bank Service Fee,FEE-202512,-450.0,9100,1,Standard monthly treasury maintenance fee.

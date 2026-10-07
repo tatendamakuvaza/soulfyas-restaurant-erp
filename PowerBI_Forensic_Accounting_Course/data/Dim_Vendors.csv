@@ -1,0 +1,51 @@
+Vendor_ID,Vendor_Name,Tax_ID,Address,City,Country,Bank_Account_Number,Bank_Routing_Number,Payment_Terms,Creation_Date,Created_By,Vendor_Risk_Rating,Is_Approved_Vendor
+VND-1001,Global Logistics Freight Co,94-1182741,"1200 Harbor Dr, Long Beach, CA",Long Beach,USA,ACCT-US-881920,021000021,Net 30,2020-01-15,EMP-102,Low,Yes
+VND-1002,Amazon Web Services (AWS),91-1928374,"410 Terry Ave N, Seattle, WA",Seattle,USA,ACCT-US-554433,121000358,Net 15,2020-02-01,EMP-104,Low,Yes
+VND-1003,Microsoft Azure Cloud,91-9988776,"One Microsoft Way, Redmond, WA",Redmond,USA,ACCT-US-665544,121000358,Net 30,2020-03-10,EMP-104,Low,Yes
+VND-1004,Ernst & Young LLP Audit,13-5544332,"One Manhattan West, New York, NY",New York,USA,ACCT-US-112233,021000089,Net 30,2020-04-20,EMP-102,Low,Yes
+VND-1005,Dell Enterprise Hardware,74-2233445,"One Dell Way, Round Rock, TX",Round Rock,USA,ACCT-US-998811,111000614,Net 30,2020-06-15,EMP-104,Low,Yes
+VND-1006,Staples Business Advantage,04-2891029,"500 Staples Dr, Framingham, MA",Framingham,USA,ACCT-US-334455,011000138,Net 30,2020-07-01,EMP-105,Low,Yes
+VND-1007,Cisco Systems Network,77-0129384,"170 West Tasman Dr, San Jose, CA",San Jose,USA,ACCT-US-778899,121000248,Net 30,2020-08-14,EMP-104,Low,Yes
+VND-1008,KPMG Tax & Advisory,13-1122998,"345 Park Ave, New York, NY",New York,USA,ACCT-US-223344,021000089,Net 30,2020-09-05,EMP-102,Low,Yes
+VND-1009,FedEx Corporate Shipping,71-0427007,"3610 Hacks Cross Rd, Memphis, TN",Memphis,USA,ACCT-US-445566,084000026,Net 15,2020-10-10,EMP-105,Low,Yes
+VND-1010,Salesforce CRM Systems,94-3320693,"415 Mission St, San Francisco, CA",San Francisco,USA,ACCT-US-556677,121000358,Net 30,2020-11-20,EMP-103,Low,Yes
+VND-1011,Iron Mountain Records,04-2588496,"85 Research Rd, Boston, MA",Boston,USA,ACCT-US-667788,011000138,Net 30,2021-01-12,EMP-105,Low,Yes
+VND-1012,Oracle Database Solutions,94-2805720,"2300 Oracle Way, Austin, TX",Austin,USA,ACCT-US-778800,111000614,Net 30,2021-02-18,EMP-104,Low,Yes
+VND-1013,Industrial Power & Utilities,95-1029384,"400 S Hope St, Los Angeles, CA",Los Angeles,USA,ACCT-US-889911,122000496,Net 15,2021-03-25,EMP-105,Low,Yes
+VND-1014,Verizon Business Telecom,13-3174059,"1095 Ave of the Americas, New York, NY",New York,USA,ACCT-US-990022,021000089,Net 30,2021-04-14,EMP-104,Low,Yes
+VND-1015,Summit Logistics Inc,95-8827361,"8820 Aviation Blvd, Inglewood, CA",Inglewood,USA,ACCT-US-102948,122000496,Net 30,2021-05-19,EMP-118,Medium,Yes
+VND-1016,Pinnacle Facilities Management,88-9468772,"9076 Commerce Way, Boston",Boston,USA,ACCT-US-266889,073709724,Net 60,2022-04-27,EMP-118,Low,Yes
+VND-1017,Beacon Media Group,76-9130188,"4599 Commerce Way, Chicago",Chicago,USA,ACCT-US-181247,048349783,Net 30,2022-06-11,EMP-118,Low,Yes
+VND-1018,Vanguard Security Services,27-3530518,"6375 Market St, Chicago",Chicago,USA,ACCT-US-840734,038716269,Net 30,2022-07-11,EMP-118,Medium,Yes
+VND-1019,Pacific Coast Packaging,63-2044645,"6983 Commerce Way, Chicago",Chicago,USA,ACCT-US-712451,012621534,Net 60,2022-01-12,EMP-105,Medium,Yes
+VND-1020,Aegis Cyber Defense,63-4700025,"3695 Grand Ave, Denver",Denver,USA,ACCT-US-557007,075181765,Net 30,2022-06-22,EMP-118,Medium,Yes
+VND-1021,Titan Industrial Supplies,31-8841505,"8851 Wilshire Blvd, Seattle",Seattle,USA,ACCT-US-513160,089442503,Net 30,2021-11-14,EMP-102,Medium,Yes
+VND-1022,Crestview Office Furniture,33-1843636,"6311 Grand Ave, Dallas",Dallas,USA,ACCT-US-321941,071028710,Net 15,2022-07-09,EMP-105,Low,Yes
+VND-1023,Omni Health Solutions,20-8890439,"8937 Wilshire Blvd, Los Angeles",Los Angeles,USA,ACCT-US-466960,040094589,Net 30,2023-01-25,EMP-102,Low,Yes
+VND-1024,Nexus Cloud Architecture,35-1341919,"4008 Market St, Seattle",Seattle,USA,ACCT-US-596564,099853245,Net 30,2023-04-15,EMP-118,Low,Yes
+VND-1025,BlueSky Aviation Freight,57-3815034,"2783 Grand Ave, San Francisco",San Francisco,USA,ACCT-US-213349,087669750,Net 30,2022-10-22,EMP-105,Medium,Yes
+VND-1026,Redwood Legal Advisory,35-2275009,"1769 Grand Ave, Chicago",Chicago,USA,ACCT-US-817497,090585882,Net 30,2023-01-12,EMP-118,Medium,Yes
+VND-1027,Frontier Telecom Partners,94-7217147,"8389 Grand Ave, San Francisco",San Francisco,USA,ACCT-US-113266,066379329,Net 60,2021-07-12,EMP-118,Medium,Yes
+VND-1028,Metro Clean Janitorial,29-8306261,"8648 Grand Ave, Seattle",Seattle,USA,ACCT-US-745830,082232344,Net 60,2022-07-27,EMP-118,High,Yes
+VND-1029,Highland Real Estate Group,44-6407373,"1519 Grand Ave, Chicago",Chicago,USA,ACCT-US-572700,042730796,Net 60,2023-10-22,EMP-105,Low,Yes
+VND-1030,Silverline Staffing Agency,13-9293086,"3079 Commerce Way, New York",New York,USA,ACCT-US-322423,057623800,Net 15,2022-05-20,EMP-118,Low,Yes
+VND-1031,Atlas Courier Express,81-1170307,"1502 Market St, Chicago",Chicago,USA,ACCT-US-855053,064549859,Net 60,2023-04-23,EMP-105,Medium,Yes
+VND-1032,Spectrum Data Analytics,67-1289293,"4920 Market St, San Francisco",San Francisco,USA,ACCT-US-524045,042655866,Net 15,2023-10-12,EMP-105,High,Yes
+VND-1033,Trident Safety Equipment,77-6767292,"9117 Grand Ave, Boston",Boston,USA,ACCT-US-468900,070900658,Net 15,2022-05-08,EMP-102,Low,Yes
+VND-1034,Zenith Marketing Partners,50-3005795,"3238 Market St, Seattle",Seattle,USA,ACCT-US-874483,074988034,Net 15,2023-10-25,EMP-118,High,Yes
+VND-1035,Horizon Printing Works,46-2686548,"4953 Market St, Chicago",Chicago,USA,ACCT-US-478411,034084236,Net 15,2021-12-18,EMP-102,Low,Yes
+VND-1036,Integra Fleet Management,15-1914794,"2168 Commerce Way, Dallas",Dallas,USA,ACCT-US-207570,011646234,Net 15,2022-08-15,EMP-105,Low,Yes
+VND-1037,Optima Executive Search,16-5235884,"1969 Wilshire Blvd, Denver",Denver,USA,ACCT-US-520172,076001106,Net 30,2023-11-22,EMP-102,Low,Yes
+VND-1038,Apex Global Consulting Ltd,99-9999999,"742 Evergreen Terrace, Springfield, OR 97477",Springfield,USA,ACCT-US-908812,123000999,Immediate,2024-02-10,EMP-118,Critical,No
+VND-1039,TrueNorth Compliance Services,29-6097514,"4166 Wilshire Blvd, San Francisco",San Francisco,USA,ACCT-US-685181,065857931,Net 30,2023-07-15,EMP-105,Low,Yes
+VND-1040,Vortex Software Labs,85-8194570,"9416 Broadway, Dallas",Dallas,USA,ACCT-US-163156,091823275,Net 30,2021-11-07,EMP-105,Low,Yes
+VND-1041,Benchmark Financial Consultants,30-5024269,"9143 Wilshire Blvd, Seattle",Seattle,USA,ACCT-US-264136,010359129,Net 60,2022-12-20,EMP-105,Low,Yes
+VND-1042,CloudSphere Solutions LLC,82-9918273,"2044 Tech Center Pkwy, Irvine, CA",Irvine,USA,ACCT-US-440099,121000248,Net 15,2023-01-10,EMP-104,High,Yes
+VND-1043,Keystone Environmental,14-4883526,"4732 Commerce Way, Dallas",Dallas,USA,ACCT-US-174637,041329612,Net 15,2023-10-22,EMP-102,Medium,Yes
+VND-1044,Precision Machine Works,24-4771676,"4452 Market St, Seattle",Seattle,USA,ACCT-US-174878,018004482,Net 30,2022-10-24,EMP-118,Low,Yes
+VND-1045,Alpha Waste Solutions,66-3086308,"5082 Commerce Way, Denver",Denver,USA,ACCT-US-385470,077172238,Net 60,2022-02-20,EMP-102,Medium,Yes
+VND-1046,Sterling Catering Services,51-5200476,"1596 Market St, Los Angeles",Los Angeles,USA,ACCT-US-807053,087201917,Net 30,2023-05-19,EMP-102,Low,Yes
+VND-1047,Quantum Digital Media,70-9706768,"4657 Market St, Denver",Denver,USA,ACCT-US-713762,068503492,Net 60,2021-08-12,EMP-105,Low,Yes
+VND-1048,AeroSpace Cargo Systems,51-2754894,"5503 Commerce Way, Seattle",Seattle,USA,ACCT-US-827369,076500726,Net 15,2023-07-27,EMP-118,Low,Yes
+VND-1049,Prime Hospitality Partners,68-2477398,"4235 Grand Ave, New York",New York,USA,ACCT-US-221552,064247457,Net 30,2023-09-15,EMP-105,Low,Yes
+VND-1050,Paramount Risk Management,34-9697969,"8267 Commerce Way, New York",New York,USA,ACCT-US-896907,016927215,Net 30,2022-09-05,EMP-105,Medium,Yes

@@ -1,0 +1,33 @@
+Account_Number,Account_Name,Account_Class,Account_Subclass,Financial_Statement,Normal_Balance,Is_Sensitive_Account
+1010,Operating Cash - Checking,Asset,Current Assets,Balance Sheet,Debit,1
+1020,Payroll Cash - Escrow,Asset,Current Assets,Balance Sheet,Debit,0
+1030,Petty Cash Fund,Asset,Current Assets,Balance Sheet,Debit,1
+1200,Accounts Receivable - Trade,Asset,Current Assets,Balance Sheet,Debit,0
+1250,Allowance for Doubtful Accounts,Asset,Current Assets,Balance Sheet,Credit,1
+1300,Inventory - Finished Goods,Asset,Current Assets,Balance Sheet,Debit,0
+1350,Prepaid Expenses & Insurance,Asset,Current Assets,Balance Sheet,Debit,0
+1500,"Property, Plant & Equipment",Asset,Non-Current Assets,Balance Sheet,Debit,0
+1550,Accumulated Depreciation,Asset,Non-Current Assets,Balance Sheet,Credit,0
+2010,Accounts Payable - Trade,Liability,Current Liabilities,Balance Sheet,Credit,0
+2020,Accrued Payroll & Benefits,Liability,Current Liabilities,Balance Sheet,Credit,0
+2030,Accrued Sales & Corporate Tax,Liability,Current Liabilities,Balance Sheet,Credit,0
+2100,Short-Term Revolving Credit,Liability,Current Liabilities,Balance Sheet,Credit,0
+2500,Long-Term Senior Notes,Liability,Long-Term Liabilities,Balance Sheet,Credit,0
+3010,Common Stock & Paid-In Capital,Equity,Shareholders Equity,Balance Sheet,Credit,0
+3020,Retained Earnings,Equity,Shareholders Equity,Balance Sheet,Credit,0
+4010,Commercial Product Sales,Revenue,Operating Revenue,Income Statement,Credit,0
+4020,Enterprise Software & Support,Revenue,Operating Revenue,Income Statement,Credit,0
+4030,Professional Services Revenue,Revenue,Operating Revenue,Income Statement,Credit,0
+4090,Sales Discounts & Allowances,Revenue,Operating Revenue,Income Statement,Debit,1
+5010,Cost of Goods Sold - Materials,Expense,Cost of Sales,Income Statement,Debit,0
+5020,Direct Labor Cost,Expense,Cost of Sales,Income Statement,Debit,0
+6010,Salaries & Wages - Operating,Expense,Operating Expenses,Income Statement,Debit,0
+6020,Employee Benefits & Health,Expense,Operating Expenses,Income Statement,Debit,0
+6030,Professional & Legal Consulting,Expense,Operating Expenses,Income Statement,Debit,1
+6040,Travel & Entertainment (T&E),Expense,Operating Expenses,Income Statement,Debit,1
+6050,Marketing & Advertising Campaigns,Expense,Operating Expenses,Income Statement,Debit,0
+6060,IT Cloud & Infrastructure,Expense,Operating Expenses,Income Statement,Debit,0
+6070,Office Facilities & Utilities,Expense,Operating Expenses,Income Statement,Debit,0
+7010,Depreciation & Amortization,Expense,Operating Expenses,Income Statement,Debit,0
+8010,Interest Expense - Debt,Expense,Non-Operating Expenses,Income Statement,Debit,0
+9100,Miscellaneous & Sundry Expense,Expense,Non-Operating Expenses,Income Statement,Debit,1

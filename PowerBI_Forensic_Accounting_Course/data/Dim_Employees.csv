@@ -1,0 +1,41 @@
+Employee_ID,Full_Name,Email,Cost_Center_ID,Department,Job_Title,Manager_ID,Hire_Date,Residential_Address,Bank_Account_Number,Approval_Limit_USD,Status
+EMP-101,Victoria Sterling,v.sterling@enterprise.io,CC-100,Executive Management,Chief Executive Officer,,2019-01-15,"1442 Bel Air Rd, Los Angeles, CA",ACCT-US-102938,500000,Active
+EMP-102,Alexander Hayes,a.hayes@enterprise.io,CC-200,Finance & Accounting,Chief Financial Officer,EMP-101,2019-03-01,"88 Ocean Blvd, Santa Monica, CA",ACCT-US-223411,250000,Active
+EMP-103,Marcus Brody,m.brody@enterprise.io,CC-300,Sales & Commercial Operations,VP of Commercial Sales,EMP-101,2020-05-12,"512 Pinecrest Way, Pasadena, CA",ACCT-US-334912,5000,Active
+EMP-104,Devon Vance,d.vance@enterprise.io,CC-400,"IT, Cloud & Cybersecurity",Chief Technology Officer,EMP-101,2020-02-18,"104 Silicon Heights, Irvine, CA",ACCT-US-449102,50000,Active
+EMP-105,Elena Rostova,e.rostova@enterprise.io,CC-200,Finance & Accounting,Senior General Ledger Accountant,EMP-102,2021-06-10,"319 Elmwood St, Glendale, CA",ACCT-US-551029,10000,Active
+EMP-106,Olivia Smith,o.smith106@enterprise.io,CC-600,Human Resources & Talent,Payroll Specialist,EMP-101,2020-10-14,"132 Oak St, Suite 21, Los Angeles, CA",ACCT-US-329258,5000,Active
+EMP-107,Camila Miller,c.miller107@enterprise.io,CC-600,Human Resources & Talent,Talent Acquisition Lead,EMP-101,2021-12-14,"448 Cedar St, Suite 29, Los Angeles, CA",ACCT-US-325772,10000,Active
+EMP-108,Liam Gonzalez,l.gonzalez108@enterprise.io,CC-100,Executive Management,Executive Director,EMP-102,2023-09-04,"487 Oak St, Suite 80, Los Angeles, CA",ACCT-US-407419,10000,Active
+EMP-109,Liam Johnson,l.johnson109@enterprise.io,CC-600,Human Resources & Talent,HR Business Partner,EMP-102,2022-08-21,"954 Cedar St, Suite 30, Los Angeles, CA",ACCT-US-488162,10000,Active
+EMP-110,Lucas Williams,l.williams110@enterprise.io,CC-500,Supply Chain & Logistics,Logistics Coordinator,EMP-101,2023-05-21,"804 Main St, Suite 38, Los Angeles, CA",ACCT-US-817870,10000,Active
+EMP-111,Sophia Johnson,s.johnson111@enterprise.io,CC-700,Legal & Regulatory Compliance,Legal Analyst,EMP-102,2022-04-21,"611 Willow St, Suite 68, Los Angeles, CA",ACCT-US-249811,10000,Active
+EMP-112,Sophia Moore,s.moore112@enterprise.io,CC-500,Supply Chain & Logistics,Procurement Specialist,EMP-101,2022-04-05,"621 Willow St, Suite 21, Los Angeles, CA",ACCT-US-892495,2500,Active
+EMP-113,Noah Garcia,n.garcia113@enterprise.io,CC-700,Legal & Regulatory Compliance,Legal Analyst,EMP-103,2023-09-09,"666 Oak St, Suite 24, Los Angeles, CA",ACCT-US-814825,10000,Active
+EMP-114,Olivia Martinez,o.martinez114@enterprise.io,CC-400,"IT, Cloud & Cybersecurity",Systems Administrator,EMP-102,2021-09-04,"991 Cedar St, Suite 74, Los Angeles, CA",ACCT-US-738551,5000,Active
+EMP-115,Mia Garcia,m.garcia115@enterprise.io,CC-500,Supply Chain & Logistics,Procurement Specialist,EMP-101,2022-05-08,"159 Maple St, Suite 20, Los Angeles, CA",ACCT-US-189814,15000,Active
+EMP-116,Camila Jones,c.jones116@enterprise.io,CC-200,Finance & Accounting,Internal Auditor,EMP-104,2023-04-18,"873 Maple St, Suite 49, Los Angeles, CA",ACCT-US-518373,10000,Active
+EMP-117,Alexander Anderson,a.anderson117@enterprise.io,CC-100,Executive Management,Executive Director,EMP-101,2021-10-08,"107 Oak St, Suite 17, Los Angeles, CA",ACCT-US-340062,2500,Active
+EMP-118,David Vance,d.vance.proc@enterprise.io,CC-500,Supply Chain & Logistics,Senior Procurement Officer,EMP-101,2022-01-10,"742 Evergreen Terrace, Springfield, OR 97477",ACCT-US-908812,25000,Active
+EMP-119,Benjamin Williams,b.williams119@enterprise.io,CC-500,Supply Chain & Logistics,Procurement Specialist,EMP-102,2021-12-19,"690 Willow St, Suite 41, Los Angeles, CA",ACCT-US-595948,15000,Active
+EMP-120,Olivia Brown,o.brown120@enterprise.io,CC-600,Human Resources & Talent,Talent Acquisition Lead,EMP-101,2020-11-21,"761 Oak St, Suite 17, Los Angeles, CA",ACCT-US-522179,10000,Active
+EMP-121,Sophia Miller,s.miller121@enterprise.io,CC-200,Finance & Accounting,Internal Auditor,EMP-101,2021-02-15,"927 Main St, Suite 22, Los Angeles, CA",ACCT-US-153045,2500,Active
+EMP-122,Sophia Garcia,s.garcia122@enterprise.io,CC-400,"IT, Cloud & Cybersecurity",Systems Administrator,EMP-102,2023-01-13,"371 Willow St, Suite 46, Los Angeles, CA",ACCT-US-543555,15000,Active
+EMP-123,William Martinez,w.martinez123@enterprise.io,CC-200,Finance & Accounting,Financial Analyst,EMP-101,2022-01-02,"698 Willow St, Suite 74, Los Angeles, CA",ACCT-US-656926,5000,Active
+EMP-124,Alexander Williams,a.williams124@enterprise.io,CC-700,Legal & Regulatory Compliance,Compliance Officer,EMP-104,2023-02-19,"352 Main St, Suite 15, Los Angeles, CA",ACCT-US-749468,2500,Active
+EMP-125,Henry Jackson,h.jackson125@enterprise.io,CC-500,Supply Chain & Logistics,Inventory Supervisor,EMP-101,2021-05-13,"234 Cedar St, Suite 68, Los Angeles, CA",ACCT-US-431535,2500,Active
+EMP-126,Elijah Martin,e.martin126@enterprise.io,CC-500,Supply Chain & Logistics,Logistics Coordinator,EMP-103,2021-06-03,"350 Cedar St, Suite 46, Los Angeles, CA",ACCT-US-265409,15000,Active
+EMP-127,Gianna Taylor,g.taylor127@enterprise.io,CC-100,Executive Management,Executive Director,EMP-103,2020-12-18,"259 Cedar St, Suite 46, Los Angeles, CA",ACCT-US-734210,5000,Active
+EMP-128,William Rodriguez,w.rodriguez128@enterprise.io,CC-500,Supply Chain & Logistics,Logistics Coordinator,EMP-104,2022-01-01,"441 Maple St, Suite 43, Los Angeles, CA",ACCT-US-269430,15000,Active
+EMP-129,Julian Thorne,j.thorne@enterprise.io,CC-300,Sales & Commercial Operations,Senior Enterprise Sales Rep,EMP-103,2022-08-01,"404 Sunset Blvd, West Hollywood, CA",ACCT-US-778811,2500,Active
+EMP-130,Camila Smith,c.smith130@enterprise.io,CC-100,Executive Management,Executive Director,EMP-102,2021-07-05,"142 Cedar St, Suite 56, Los Angeles, CA",ACCT-US-141832,10000,Active
+EMP-131,Sophia Brown,s.brown131@enterprise.io,CC-300,Sales & Commercial Operations,Business Development Rep,EMP-103,2021-07-01,"283 Cedar St, Suite 62, Los Angeles, CA",ACCT-US-802448,5000,Active
+EMP-132,Ava Brown,a.brown132@enterprise.io,CC-400,"IT, Cloud & Cybersecurity",Systems Administrator,EMP-101,2022-04-08,"124 Maple St, Suite 61, Los Angeles, CA",ACCT-US-444207,10000,Active
+EMP-133,Rachel Zane,r.zane@enterprise.io,CC-300,Sales & Commercial Operations,Key Account Executive,EMP-103,2021-11-15,"812 Beverly Glen, Century City, CA",ACCT-US-661199,2500,Active
+EMP-134,Lucas Lopez,l.lopez134@enterprise.io,CC-600,Human Resources & Talent,HR Business Partner,EMP-103,2022-03-19,"371 Oak St, Suite 23, Los Angeles, CA",ACCT-US-725550,15000,Active
+EMP-135,Benjamin Wilson,b.wilson135@enterprise.io,CC-500,Supply Chain & Logistics,Logistics Coordinator,EMP-101,2023-01-17,"925 Main St, Suite 35, Los Angeles, CA",ACCT-US-481913,15000,Active
+EMP-136,Benjamin Martin,b.martin136@enterprise.io,CC-300,Sales & Commercial Operations,Business Development Rep,EMP-104,2023-06-13,"813 Cedar St, Suite 80, Los Angeles, CA",ACCT-US-233470,5000,Active
+EMP-137,Oliver Garcia,o.garcia137@enterprise.io,CC-500,Supply Chain & Logistics,Logistics Coordinator,EMP-104,2021-07-26,"693 Main St, Suite 51, Los Angeles, CA",ACCT-US-587575,15000,Active
+EMP-138,William Taylor,w.taylor138@enterprise.io,CC-400,"IT, Cloud & Cybersecurity",Systems Administrator,EMP-102,2022-02-27,"869 Maple St, Suite 49, Los Angeles, CA",ACCT-US-335552,5000,Active
+EMP-139,James Johnson,j.johnson139@enterprise.io,CC-200,Finance & Accounting,Internal Auditor,EMP-101,2021-12-23,"493 Willow St, Suite 61, Los Angeles, CA",ACCT-US-355836,5000,Active
+EMP-140,Olivia Wilson,o.wilson140@enterprise.io,CC-200,Finance & Accounting,Accounts Payable Specialist,EMP-104,2021-02-15,"236 Willow St, Suite 77, Los Angeles, CA",ACCT-US-686075,10000,Active
